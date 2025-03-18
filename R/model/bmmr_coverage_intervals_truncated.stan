@@ -104,8 +104,8 @@ data {
   vector[X] E_age; // exposures by age group 
   matrix[S, X] pi_x_hat; // sex-specific means age-distributions - this model assumes they are inputs, but we can code a model for the age groups 
   matrix[S,X] pi_sd; // lower bounds for the age distribution estimates 
-  matrix[S,X] mu_x_wpp; //baseline mortality from the WPP 
-  vector[X] mu_age_wpp; // age specific baseline mortality
+  matrix[S,X] mu_x_noc; //baseline mortality from the WPP 
+  vector[X] mu_age_noc; // age specific baseline mortality
   matrix [S,X] U; 
   matrix[S,X] L; 
 }
@@ -153,14 +153,14 @@ transformed parameters {
       R_x[s,x] =pi_x[s,x]*R; // generating each R_x from the age distributions 
       log_mu_x[s,x] = log(R_x[s,x]/E_x[s,x]) -log(pr); //compute the age-specific mortality rates 
       mu_x[s,x] = exp(log_mu_x[s,x]);  //exponentiate the mortality 
-      mu_x_total[s,x] =  mu_x[s,x] + mu_x_wpp[s,x]; //add the baseline mortality from WPP 
+      mu_x_total[s,x] =  mu_x[s,x] + mu_x_noc[s,x]; //add the baseline mortality from WPP 
      }
   }
   
   R_age = v_ones *R_x; // get reported deaths aggregated over sex 
   for(x in 1:X){
     mu_age[x] = log(R_age[x]/E_age[x]) -log(pr); 
-    mu_age_total[x] = exp(mu_age[x]) + mu_age_wpp[x];
+    mu_age_total[x] = exp(mu_age[x]) + mu_age_noc[x];
   }
    
 }
@@ -186,7 +186,7 @@ generated quantities{
     for(x in 1:X){
         D_x_sim[s,x] = poisson_rng(E_x[s,x]*mu_x[s,x]); // compute age-adjusted deaths from our estimated mortalities 
         R_x_sim[s,x] =to_int(pi_x[s,x]*R); // generating each R_x from the age distributions 
-      //  D_x_total[s,x] = D_x_sim[s,x] + D_x_wpp[s,x];
+      //  D_x_total[s,x] = D_x_sim[s,x] + D_x_noc[s,x];
     }
   }
   
