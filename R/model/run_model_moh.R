@@ -11,9 +11,9 @@ setwd("U:/Documents/repos/uncertainty_quantification/")
 source("R/0_setup.R")
 ## set the working directory
 model_dir <- paste0(getwd(),"/R/model/")
-results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2022/2024/palestine/")
+results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2022/2024/gaza/")
 ## load the 2024 moh age distributions (as an example)
-pi_x_moh <- readRDS("data_inter/pi_x_moh_2024.rds")
+pi_x_moh <- readRDS("data/pi_x_moh_2024.rds")
 ## get the sex-specific age distributions 
 pi_x_moh <- pi_x_moh[pi_x_moh$sex!="t",]
 
@@ -51,8 +51,10 @@ mu_x_pcbs <-  (D_x_pcbs[,-1])/E_x[,-1]
 ## age specific mortality 
 mu_age_pcbs <- colSums(D_x_pcbs[,-1])/E_age
 
-### set the reported death toll (Gaza, 2024)
-R =23563 
+### set the reported death toll (Gaza, 2024)### get reported cumulative death count (Palestine 2023: 22286, 2024: 24213)
+### WB: 2023: 308, 2024: 494 
+## Gaza Strip: 2023: 21978,  2024: 23719
+R =23719
 ## total number of sexes 
 S = nrow(mu_x_pcbs)
 ## total number of age groups 
@@ -68,27 +70,25 @@ x <- as.numeric(colnames(mu_x_pcbs))
 ## compile the model 
 compiled_model <- stan_model(paste0(model_dir, "bmmr_coverage_intervals.stan"))
 
-
 model_out <- sampling(compiled_model,
-                    # sample_file=paste0('G:/irena/bmmr/oct26_samples.csv'), #writes the samples to CSV file
+                      # include = TRUE,
+                      sample_file=paste0(results_dir, 'moh_samples.csv'), #writes the samples to CSV file
                       iter =2000,
                       warmup=1000, #BURN IN
                       chains =4,
                       seed = seed,
                       control = list(max_treedepth = 60,
-                                     adapt_delta=0.8),
+                                     adapt_delta=0.85),
                       data = list(
-                        mu_x_wpp = mu_x_wpp, ## WPP baseline mortality
-                        mu_age_wpp = mu_age_wpp, ## WPP age baseline 
+                        mu_x_noc = mu_x_pcbs, ## WPP baseline mortality
+                        mu_age_noc = mu_age_pcbs, ## WPP age baseline 
                         E_x = E_x[,-1],
                         E_age = E_age,
-                        pi_x_hat = log(pi_x[,-1]), ##means of the age distributions
-                        pi_sd =pi_sd,
+                        pi_x_hat = pi_mu, ##means of the age distributions
+                        pi_sd = pi_sd, 
                         R = R,
                         S = S,
-                        X= X)
-                      )
-
+                        X= X))
 ## check for convergence
 # 
 # rstan::traceplot(model_out, pars=c("mu_age_total[1]", "pi_x[1,1]", "pi_x[1,3]", "pr"))
