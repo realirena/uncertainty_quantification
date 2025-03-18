@@ -7,12 +7,12 @@ library(reshape2)
 setwd("U:/Documents/repos/Life_expectancy_Palestine")
 
 dt <- 
-  readRDS("data_inter/ex0_noc.rds") %>% 
+  readRDS("data/ex0_noc.rds") %>% 
   mutate(sex = case_when(sex == "m" ~ "Males",
                          sex == "f" ~ "Females",
                          sex == "t" ~ "Total"))
 dt_gaza <- 
-  readRDS("data_inter/ex0_noc.rds") %>% 
+  readRDS("data/ex0_noc.rds") %>% 
   filter(source=="lc_pcbs_2019"& region=="Gaza Strip") %>%
   mutate(lss = ex_noc - ex_cnf, 
          sex = case_when(sex == "m" ~ "Males",
@@ -23,7 +23,7 @@ dt_gaza <-
 
 
 dt_palestine <- 
-  readRDS("data_inter/ex0_noc.rds") %>% 
+  readRDS("data/ex0_noc.rds") %>% 
   filter(source=="lc_pcbs_2019"& region=="Palestine") %>%
   mutate(scenario="Counterfactual with\n no conflict deaths", 
          lss = ex_noc - ex_cnf,
@@ -40,7 +40,7 @@ panels <- tibble(sex = rep(c("Females", "Males", "Total"), 2),
 
 
 ### add new graphing code to plot the uncertainty estimates: 
-results_dir <- paste0(getwd(),"/R/bmmr/samples/2023/pcbs/2019/gaza/")
+results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2019/2023/gaza/")
 vars <- c("ex", "bmmr_lss","year", "sex", "scenario")
 
 ## oct 26th results (updated with age distribution uncertainty)
@@ -146,7 +146,7 @@ le0_lss <- gridExtra::grid.arrange(le0_plot, lss_plot)
 
 
 ### add new graphing code to plot the 2024 uncertainty estimates: 
-results_dir <- paste0(getwd(),"/R/bmmr/samples/2024/pcbs/2019/gaza/")
+results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2019/2024/gaza/")
 ## MoH 2024 (oct 23 - oct 24) results
 moh_le_m_24 <- read.csv(paste0(results_dir, "moh_lifetable_m_le0.csv"))
 moh_le_f_24 <- read.csv(paste0(results_dir, "moh_lifetable_f_le0.csv"))
@@ -183,14 +183,75 @@ lss_23_24  <-  lss_plot +  stat_histinterval(data=le_lss_all24, aes(x = year, y=
                                size=2,
                                alpha=0.5) 
 
-le0_lss_23_24 <- gridExtra::grid.arrange(le0_23_24, lss_23_24)
+le0_lss_23_24 <- gridExtra::grid.arrange(le0_23_24_2, lss_23_24)
 
-ggsave("figures/un_conflict_pix/le0_lss_gaza_23_24.png", plot=le0_lss_23_24,
-       w = 16, h = 8)
+## Trying to embed a smaller plot
+focus_male <- ggplot() + 
+  stat_histinterval(data=le_lss_all %>%
+                      filter(sex == "Males"), aes(x = year, 
+                                                 y=ex, group=scenario, 
+                                                 fill=scenario, 
+                                                 color=scenario),
+                    size=2,
+                    alpha=0.5) +
+  # scale_color_manual(values = c("#de5138", "#5a9cee", "#E69F00")) + 
+  scale_color_manual("",values = c("#FFA500","#ef476f",  "#118ab2"),
+                     labels=  c("B'Tselem historical average","GMoH report",  "UN-IGME pattern"),
+                     guide = 'none') + 
+  scale_fill_manual(values = c( "#FFA500", "#ef476f", "#118ab2"),
+                    labels=  c("B'Tselem historical average","GMoH report",  "UN-IGME pattern"),
+                    guide = 'none'
+                    # ,labels = c(
+                    #  "GMoH", 
+                    #  "Historical\naverage",
+                    #  "UN-IGME")
+  ) +
+  #scale_fill_manual(values=c("#fe9441","#85b5cd", "#DE9D0D")) + 
+  scale_linetype_discrete(name="")+
+  theme_bw()+
+  theme(strip.background = element_blank(),
+        strip.placement = "outside",
+        strip.text = element_text(size = 13),
+        legend.position = "bottom",
+        legend.text = element_text(size = 15),
+        legend.title = element_text(size = 15),
+        axis.title.y = element_blank(),
+        axis.text = element_text(size = 11),
+        axis.title = element_text(size = 12)) +
+  stat_histinterval(data=le_lss_all24 %>%
+                      filter(sex == "Males"), aes(x = year, y=ex, group=scenario, 
+                                           fill=scenario, color=scenario),
+                    size=2,
+                    alpha=0.5) 
+  
+
+## This function allows us to specify which facet to annotate
+annotation_custom2 <- function (grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf, data) 
+{
+  layer(data = data, stat = StatIdentity, position = PositionIdentity, 
+        geom = ggplot2:::GeomCustomAnn,
+        inherit.aes = TRUE, params = list(grob = grob, 
+                                          xmin = xmin, xmax = xmax, 
+                                          ymin = ymin, ymax = ymax))
+}
+
+embedded_grob <- ggplotGrob(focus_male)
+
+# Combine the plots
+le0_23_24_2 <- le0_23_24 +
+  # annotation_custom(grob = embedded_grob, xmin = 2012, xmax = 2020, ymin = 25, ymax = 60)
+  annotation_custom2(grob=embedded_grob, 
+                     data = data.frame(sex="Males"),
+                     xmin = 2012, xmax = 2021, ymin = 25, ymax = 60)
+
+le0_lss_23_24 <- gridExtra::grid.arrange(le0_23_24_2, lss_23_24)
+
+# ggsave("figures/un_conflict_pix/le0_lss_gaza_23_24.png", plot=le0_lss_23_24,
+#        w = 16, h = 8)
 
 ##### --------------------------
 ###UN genocide results 
-results_dir <- paste0(getwd(),"/R/bmmr/samples/2023/pcbs/2019/gaza/")
+results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2019/2023/gaza/")
 un_le_m_geno23 <- read.csv(paste0(results_dir, "un_geno23_lifetable_m_le0.csv"))
 un_le_f_geno23 <- read.csv(paste0(results_dir, "un_geno23_lifetable_f_le0.csv"))
 un_le_t_geno23 <- read.csv(paste0(results_dir, "un_geno23_lifetable_t_le0.csv"))
@@ -265,7 +326,7 @@ le0_lss_geno_23 <- gridExtra::grid.arrange(le0_plot_geno, lss_plot_geno)
 
 #ggsave("figures/un_genocide_pix/le0_lss_palestine_23.png", plot=le0_lss_geno_23, w = 16, h = 8)
 ###UN genocide results 
-results_dir <- paste0(getwd(),"/R/bmmr/samples/2024/pcbs/2019/gaza/")
+results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2019/2024/gaza/")
 un_le_m_geno24 <- read.csv(paste0(results_dir, "un_geno24_lifetable_m_le0.csv"))
 un_le_f_geno24 <- read.csv(paste0(results_dir, "un_geno24_lifetable_f_le0.csv"))
 un_le_t_geno24 <- read.csv(paste0(results_dir, "un_geno24_lifetable_t_le0.csv"))
@@ -299,7 +360,7 @@ ggsave("figures/un_genocide_pix/le0_lss_gaza_23_24_ungenocide.png", plot=le0_lss
 
 ##### --------------------------
 ###UN earthquake results 
-results_dir <- paste0(getwd(),"/R/bmmr/samples/2023/pcbs/2019/gaza/")
+results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2019/2023/gaza/")
 un_le_m_earth23 <- read.csv(paste0(results_dir, "un_earth23_lifetable_m_le0.csv"))
 un_le_f_earth23 <- read.csv(paste0(results_dir, "un_earth23_lifetable_f_le0.csv"))
 un_le_t_earth23 <- read.csv(paste0(results_dir, "un_earth23_lifetable_t_le0.csv"))
@@ -372,7 +433,7 @@ lss_plot_earth <-  ggplot() +
 le0_lss_earth_23 <- gridExtra::grid.arrange(le0_plot_earth, lss_plot_earth)
 
 #ggsave("figures/un_earth_pix/le0_lss_palestine_23.png", plot=le0_lss_earth_23, w = 16, h = 8)
-results_dir <- paste0(getwd(),"/R/bmmr/samples/2024/pcbs/2019/gaza/")
+results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2019/2024/gaza/")
 
 un_le_m_earth24 <- read.csv(paste0(results_dir, "un_earth24_lifetable_m_le0.csv"))
 un_le_f_earth24 <- read.csv(paste0(results_dir, "un_earth24_lifetable_f_le0.csv"))
