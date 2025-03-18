@@ -11,7 +11,7 @@ setwd("U:/Documents/repos/uncertainty_quantification/")
 ## load the functions to calculate life expectancy 
 source("R/0_setup.R")
 
-## set model + results directory
+## set up model + results directory
 model_dir <- paste0(getwd(),"/R/model/")
 results_dir <- paste0(getwd(),"/R/model/samples/2022_pcbs/2024/gaza")
 
