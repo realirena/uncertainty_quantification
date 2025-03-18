@@ -3,89 +3,71 @@ rm(list=ls())
 library(tidyverse)
 library(haven)
 library(rstan)
-library(stringr)
-seed = 823
+library(reshape2)
+seed = 12125
 options(mc.cores = parallel::detectCores(logical= FALSE))
-
+setwd("U:/Documents/repos/uncertainty_quantification/")
+## load the functions to calculate life expectancy 
+source("R/0_setup.R")
 ## set the working directory
-setwd("U:/Documents/repos/Life_expectancy_Palestine")
-model_dir <- paste0(getwd(),"/R/bmmr/")
-results_dir <- paste0(getwd(),"/R/bmmr/samples/")
+model_dir <- paste0(getwd(),"/R/model/")
+results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2022/2024/palestine/")
+## load the 2024 moh age distributions (as an example)
+pi_x_moh <- readRDS("data_inter/pi_x_moh_2024.rds")
+## get the sex-specific age distributions 
+pi_x_moh <- pi_x_moh[pi_x_moh$sex!="t",]
 
-## read in age distributions
-pi_x_oct26 <- read.csv(paste0(model_dir, "data/moh_2024_var_sims.csv"))
-#### for the august 24 distributions, we have some age categories that do not have verified deaths: 
-## so we make 75+ to be the last age group (for men and women)
+## reshape the age distributions for the shape that we need for the model 
+pi_x= spread(pi_x_moh[,c("sex", "age", "pi_x_mean")], key=age, value=pi_x_mean)
+pi_sds= spread(pi_x_moh[,c("sex", "age", "pi_x_sd")], key=age, value=pi_x_sd)
+pi_ul = spread(pi_x_moh[,c("sex", "age", "pi_x_ul")], key=age, value=pi_x_ul)
+pi_ll = spread(pi_x_moh[,c("sex", "age", "pi_x_ll")], key=age, value=pi_x_ll)
 
-## reshape the age distributions 
-pi_x= spread(pi_x_oct26[,c("sex", "age5", "pi_x_mean")], key=age5, value=pi_x_mean)
-pi_sds= spread(pi_x_oct26[,c("sex", "age5", "pi_x_sd")], key=age5, value=pi_x_sd)
+## we want E(log(theta)) and sd(log(theta)), so apply Delta method to the means and sds: 
+pi_mu = log(pi_x[,-1])
 pi_sd = pi_sds[,-1]/pi_x[,-1]
 
-## read in exposure data: 
-wpp_5yr_22 <- readRDS("data_inter/wpp2024_exposures_region.rds")
-wpp_5yr_22 <- readRDS("data_inter/wpp2024_populations_5y_ages.rds")
-## get palestine 2024 exposures by sex 
-wpp_pse <- wpp_5yr_22[wpp_5yr_22$Year==2024&wpp_5yr_22$Sex%in%c("m", "f"),]
 
-### since we grouped 75+ into its own age group, need to reshape the exposures to match 
+##-------------------------------
+## read in the exposure and the forecasted baseline mortality 
+##-------------------------------
+## read in exposure data:
+master_forecast_dt <- readRDS("R/lc/data_plus_forecasts_v2.rds")
+pcbs_exp  <- master_forecast_dt[master_forecast_dt$region=="Gaza Strip"&master_forecast_dt$year==2024&master_forecast_dt$sex%in%c("m", "f")&master_forecast_dt$source=="pcbs",]
 ## number of exposures by age
-E_x = spread(wpp_pse[,c("sex", "age","pop")], key=age, value=pop)
-
-## get total exposures 
-# E = sum(rowSums(E_x_grp[,-1]))
-E = sum(rowSums(E_x[,-1]))
+E_x = spread(pcbs_exp[,c("sex", "age","pop")], key=age, value=pop)
 ## exposures by age 
 E_age =colSums(E_x[,-1])
-
-## read in baseline mortality data from WPP: 
-wpp_deaths <-read.csv("R/bmmr/data/WPP_deaths_palestine_agegrp_2024.csv")
-
-wpp_deaths_grp <- wpp_deaths |> 
-  group_by(sex, age_grp) |> 
-  summarise(deaths = sum(deaths))
-
-D_x_wpp = spread(wpp_deaths_grp[,c("sex", "age_grp","deaths")], key=age_grp, value=deaths)
+## get total exposures 
+E = sum(rowSums(E_x[,-1]))
 
 
-mu_x_wpp <-  (D_x_wpp[,-1])/E_x[,-1] 
-mu_age_wpp <- colSums(D_x_wpp[,-1])/E_age
+## reshape the forecasted baseline mortality as well 
+pcbs_mx<-  master_forecast_dt[master_forecast_dt$region=="Gaza Strip"&master_forecast_dt$year==2024&master_forecast_dt$sex%in%c("m", "f")&master_forecast_dt$source=="lc_pcbs_2022",]
+D_x_pcbs= spread(pcbs_mx[,c("sex", "age","mx_noc")], key=age, value=mx_noc)
 
-#pi_sds = matrix(rep(0.05, 34), nrow=2, ncol=17)
+## age-sex specific mortality rates 
+mu_x_pcbs <-  (D_x_pcbs[,-1])/E_x[,-1] 
+## age specific mortality 
+mu_age_pcbs <- colSums(D_x_pcbs[,-1])/E_age
 
-### get reported cumulative death count (for 2024: this is OCHA day 452)
-R =45541
-### multiply R by the age distribution to get R_x 
-R_x = pi_x[,-1]*R
+### set the reported death toll (Gaza, 2024)
+R =23563 
+## total number of sexes 
+S = nrow(mu_x_pcbs)
+## total number of age groups 
+X = ncol(mu_x_pcbs)
 
-### crude mortality 
-mu_x_hat = R_x/E_x[,-1]
-
-## round to the nearest integer (since R_x needs to be integer valued for modeling as a Poisson)
-R_x = round(R_x)
-## can't have 0s in the counts so replace them with 1 -> for 2024, the reported death count stays the same 
-R_x[R_x==0] <- 1
-
-S = nrow(R_x)
-X = ncol(R_x)
 ## age groups 
-x <- as.numeric(colnames(R_x))
+x <- as.numeric(colnames(mu_x_pcbs))
 
-## baseline deaths
-## read in baseline mortality data from WPP: 
-wpp_deaths <-readRDS("data_inter/data_plus_forecasts.rds")
+##-------------------------------
+## setting up and running the Bayesian model 
+##-------------------------------
 
-wpp_deaths_2024 <- wpp_deaths[wpp_deaths$region=="Palestine"&wpp_deaths$year==2024&wpp_deaths$sex%in%c("f", "m")&wpp_deaths$source=="lc_wpp2024", ]
-
-mu_x_wpp = spread(wpp_deaths_2024[,c("sex", "age","mx_noc")], key=age, value=mx_noc)
-mu_age_wpp <- colSums(mu_x_wpp[,-1])
-
-## compile the model (uncomment these lines if you wish to run the model again)
+## compile the model 
 compiled_model <- stan_model(paste0(model_dir, "bmmr_coverage_intervals.stan"))
-# # ## run the model 
 
-#file_names <- c("aug24_samples_multinom_sds_1", "aug24_samples_multinom_sds_2",  "aug24_samples_multinom_sds_3", "aug24_samples_multinom_sds_4")
-#model_out <- read_stan_csv(paste0("G:/irena/bmmr/", file_names,".csv"))
 
 model_out <- sampling(compiled_model,
                     # sample_file=paste0('G:/irena/bmmr/oct26_samples.csv'), #writes the samples to CSV file
