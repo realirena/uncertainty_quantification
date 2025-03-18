@@ -6,16 +6,17 @@ library(reshape2)
 library(stringr)
 library(rstan)
 seed = 1234
+## set the working directory
+setwd("U:/Documents/repos/uncertainty_quantification/")
 ## load the functions to calculate life expectancy 
 source("R/0_setup.R")
 
-## set the working directory
-setwd("U:/Documents/repos/Life_expectancy_Palestine")
-model_dir <- paste0(getwd(),"/R/bmmr/")
-results_dir <- paste0(getwd(),"/R/bmmr/samples/2024/pcbs/")
+## set up model + results directory
+model_dir <- paste0(getwd(),"/R/model/")
+results_dir <- paste0(getwd(),"/R/model/samples/2022_pcbs/2024/gaza")
 
 ## read in age distributions (btselem data)
-pi_x_selem <- readRDS("data_inter/pi_x_btselem_2024.rds")
+pi_x_selem <- readRDS("data/pi_x_btselem_2024_gaza.rds")
 pi_x_selem <- pi_x_selem[pi_x_selem$sex!="t",]
 ## reshape the age distributions 
 pi_x= spread(pi_x_selem[,c("sex", "age", "pi_x_mean")], key=age, value=pi_x_mean)
