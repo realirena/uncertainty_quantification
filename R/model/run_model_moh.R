@@ -80,11 +80,11 @@ model_out <- sampling(compiled_model,
                       control = list(max_treedepth = 60,
                                      adapt_delta=0.85),
                       data = list(
-                        mu_x_noc = mu_x_pcbs, ## WPP baseline mortality
-                        mu_age_noc = mu_age_pcbs, ## WPP age baseline 
+                        mu_x_noc = mu_x_pcbs, ##  baseline mortality
+                        mu_age_noc = mu_age_pcbs, # WPP age baseline 
                         E_x = E_x[,-1],
                         E_age = E_age,
-                        pi_x_hat = pi_mu, ##means of the age distributions
+                        pi_x_hat = pi_mu,
                         pi_sd = pi_sd, 
                         R = R,
                         S = S,

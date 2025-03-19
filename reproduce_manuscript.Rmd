@@ -1,0 +1,144 @@
+---
+title: "Reproducible Vignette for Manuscript"
+output: html_document
+date: "2025-03-19"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(haven)
+library(rstan)
+library(reshape2)
+seed = 12125
+setwd("U:/Documents/repos/uncertainty_quantification/")
+## set up the directories to where these files are stored locally 
+model_dir <- paste0(getwd(),"/R/model/")
+results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2019/2024/gaza/")
+
+source("R/0_setup.R")
+```
+
+# Model Estimation 
+
+The "run_model" files contain the code used to obtain posterior sample estimates for each of the three age distribution sources. For brevity, we will use the GMoH age-distributions as an illustration in this vignette. 
+
+```{r define_vars}
+
+## get the sex-specific age distributions 
+pi_x_moh <- readRDS("data/pi_x_moh_2024.rds")
+pi_x_moh <- pi_x_moh[pi_x_moh$sex!="t",]
+
+## reshape the age distributions for the shape that we need for the model 
+pi_x= spread(pi_x_moh[,c("sex", "age", "pi_x_mean")], key=age, value=pi_x_mean) ## means of the age distributions
+pi_sds= spread(pi_x_moh[,c("sex", "age", "pi_x_sd")], key=age, value=pi_x_sd) ## uncertainty with the age distributions 
+
+## for the model, we we want E(log(theta)) and sd(log(theta)), so apply Delta method to the means and sds: 
+pi_mu = log(pi_x[,-1])
+pi_sd = pi_sds[,-1]/pi_x[,-1]
+
+## read in exposure data:
+master_forecast_dt <- readRDS("R/lc/data_plus_forecasts_v2.rds")
+pcbs_exp  <- master_forecast_dt[master_forecast_dt$region=="Gaza Strip"&master_forecast_dt$year==2024&master_forecast_dt$sex%in%c("m", "f")&master_forecast_dt$source=="pcbs",]
+
+## number of exposures by age
+E_x = spread(pcbs_exp[,c("sex", "age","pop")], key=age, value=pop)
+## exposures by age 
+E_age =colSums(E_x[,-1])
+## get total exposures 
+E = sum(rowSums(E_x[,-1]))
+
+## reshape the forecasted baseline mortality as well 
+pcbs_mx<-  master_forecast_dt[master_forecast_dt$region=="Gaza Strip"&master_forecast_dt$year==2024&master_forecast_dt$sex%in%c("m", "f")&master_forecast_dt$source=="lc_pcbs_2022",]
+D_x_pcbs= spread(pcbs_mx[,c("sex", "age","mx_noc")], key=age, value=mx_noc)
+
+## age-sex specific mortality rates 
+mu_x_pcbs <-  (D_x_pcbs[,-1])/E_x[,-1] 
+## age specific mortality 
+mu_age_pcbs <- colSums(D_x_pcbs[,-1])/E_age
+
+### set the reported death toll: for Gaza 2024, this number is 23719
+R =23719
+
+## total number of sexes 
+S = nrow(mu_x_pcbs)
+## total number of age groups 
+X = ncol(mu_x_pcbs)
+## age groups 
+x <- as.numeric(colnames(mu_x_pcbs))
+```
+
+Now that we have defined our variables and formatted them into the shapes needed for the model, we can compile and run the model. For brevity, we're running just 1 chain with 100 iterations and 50 burn in, but for the actual analysis, we did 4 chains with 2,000 iterations/1,000 burn in each. 
+
+```{r run_bayesian_model, echo=FALSE}
+## compile the model 
+compiled_model <- stan_model(paste0(model_dir, "bmmr_coverage_intervals.stan"))
+
+## run the model
+model_out <- sampling(compiled_model,
+                      iter =100,
+                      warmup=50, #BURN IN
+                      chains =1,
+                      seed = seed,
+                      control = list(max_treedepth = 60,
+                                     adapt_delta=0.85),
+                      data = list(
+                        mu_x_noc = mu_x_pcbs,
+                        mu_age_noc = mu_age_pcbs,
+                        E_x = E_x[,-1],
+                        E_age = E_age,
+                        pi_x_hat = pi_mu, 
+                        pi_sd = pi_sd, 
+                        R = R,
+                        S = S,
+                        X= X))
+```
+
+# Compute Life Expectancies 
+
+The "get_le0" file contains the code that takes in the posterior samples and outputs lifetable estimates for each MCMC iteration. We'll illustrate with just ten random samples, but for the analysis, we used 1,000 random samples from each model. 
+
+```{r extract_samples}
+## read in samples ()
+file_names <- c("moh_samples_1", "moh_samples_2", "moh_samples_3", "moh_samples_4")
+model_out <- read_stan_csv(paste0(results_dir, file_names,".csv"))
+
+### extract the model-generated mortality distributions (incl WPP deaths)
+mu_x_total = rstan::extract(model_out, pars=c("mu_x_total"))$mu_x_total
+## mortality over sexes (only age specific )
+mu_age_total =  rstan::extract(model_out, pars=c("mu_age_total"))$mu_age_total
+
+## this is a 4000 (iterations) x 2 (sex) x 18 (age groups) array 
+num_iter <- dim(mu_x_total)[1] ## grab the number of MCMC iterations 
+
+## get 10 random samples of the model: 
+set.seed(233)
+ran_iter <- sample(c(1:num_iter), 10, replace=FALSE)
+
+## this should now be an array with dimension ran_iter x 2 x 17 
+mu_x_subset <- mu_x_total[ran_iter,,]
+mu_age_subset <- mu_age_total[ran_iter,]
+## get estimated life expectancies from the life table calculations 
+```
+
+As an illustration, we'll just get 10 lifetable calculations for females: 
+```{r female_lifetables}
+lifetable_f  <- list()
+for(i in 1:10){
+  lifetable_f[[i]] <- lifetable.mx(x, t(mu_x_subset[i, 1,]), sex="f")  # get life expectancy for women 
+}
+
+## get life expectancy tables into a dataset 
+all_lifetable_f <- Reduce(rbind,lifetable_f)
+```
+
+Once we have the life. For illustration, here is the code to obtain the life expectancies for females: 
+```{r compute_le0}
+lifetable_f_age0 <- get_le0_dt(all_lifetable_f, "Females", 2024,  "GMoH Report", le0=c("", "", ""))
+```
+
+
+# Visualizations 
+```{r pressure, echo=FALSE}
+
+```

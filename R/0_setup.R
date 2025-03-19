@@ -188,4 +188,21 @@ lifetable.mx <- function(x, mx, sex="m", ax=NULL){
   return(return.df)
 }
 
+## grab the life expectancy (by sex) at age 0 
+get_le0_dt <- function(lifetable, sex=NULL, year, scenario, le0){ 
+  ## also use males for total LE computations (for now)
+  lifetable_age0 <- lifetable[lifetable$x==0,]
+  lifetable_age0$year <- year
+  lifetable_age0$sex <- sex
+  lifetable_age0$scenario <- scenario
+  if(sex=="Females"){
+    lifetable_age0$bmmr_lss <-	le0[1] -  lifetable_age0$ex   ## LSS for women
+  } else if(sex=="Males"){
+    lifetable_age0$bmmr_lss <-	le0[2] - lifetable_age0$ex     ## LSS for men 
+  } else{
+    lifetable_age0$bmmr_lss <- 	le0[3] - lifetable_age0$ex  ## total LSS
+  }
+  return(lifetable_age0)
+}
+
 
