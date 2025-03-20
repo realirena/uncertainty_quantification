@@ -67,24 +67,8 @@ all_lifetable_f <- Reduce(rbind,lifetable_f)
 all_lifetable_m <- Reduce(rbind,lifetable_m)
 all_lifetable_t <- Reduce(rbind,lifetable_t)
 
-## grab the life expectancy (by sex) at age 0 
-get_le0_dt <- function(lifetable, sex=NULL, year, scenario, le0){ 
-  ## also use males for total LE computations (for now)
-  lifetable_age0 <- lifetable[lifetable$x==0,]
-  lifetable_age0$year <- year
-  lifetable_age0$sex <- sex
-  lifetable_age0$scenario <- scenario
-  if(sex=="Females"){
-    lifetable_age0$bmmr_lss <-	le0[1] -  lifetable_age0$ex   ## LSS for women
-  } else if(sex=="Males"){
-    lifetable_age0$bmmr_lss <-	le0[2] - lifetable_age0$ex     ## LSS for men 
-  } else{
-    lifetable_age0$bmmr_lss <- 	le0[3] - lifetable_age0$ex  ## total LSS
-  }
-  return(lifetable_age0)
-}
-## scenarios:  "GMoH report", "B'Tselem historical average", "UN-IGME pattern"
 
+## scenarios:  "GMoH report", "B'Tselem historical average", "UN-IGME pattern"
 lifetable_f_age0 <- get_le0_dt(all_lifetable_f, "Females", 2024,  "B'Tselem historical average", le0= le_noc_list[[4]])
 lifetable_m_age0 <- get_le0_dt(all_lifetable_m, "Males", 2024,  "B'Tselem historical average", le0= le_noc_list[[4]])
 lifetable_t_age0 <- get_le0_dt(all_lifetable_t, "Total", 2024,"B'Tselem historical average", le0= le_noc_list[[4]])
