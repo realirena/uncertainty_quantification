@@ -55,40 +55,49 @@ gaza_all <- rbind(gaza_le_f_age0[,vars], gaza_le_m_age0[,vars], gaza_le_t_age0[,
 gaza_all$region="Gaza Strip"
 
 ## West Bank results
-wb_all <- read_rds(paste0(results_dir, "west_bank/lifetable_age0_wb_23.rds")) 
+wb_all <- read_rds(paste0(results_dir, "west_bank/lifetable_age0_wb_23_v2.rds")) 
 wb_all$region="West Bank"
 
-le_lss_all <- rbind(nat_all, gaza_all, wb_all)
+le_lss_all <- rbind(nat_all, gaza_all, wb_all) 
 
 ## plot of life expectancies at birth 
 le0_plot <- ggplot() +   
-  geom_point(data = dt_ex %>% filter(year <= 2022),
+  geom_point(data = dt_ex %>% filter(year <= 2022) %>%
+               filter(sex != "Total"),
              aes(x = year, y = ex_cnf,color=region, pch =  region),  alpha = 1, size = 3) + 
-  geom_line(data = dt_ex, aes(year, ex_noc, color=region, group=region, linetype = "Life Expectancy (no conflict)"),alpha=0.5,  linewidth=1) + 
+  geom_line(data = dt_ex%>%
+              filter(sex != "Total"), aes(year, ex_noc, color=region, group=region, linetype = "Life Expectancy (no conflict)"),alpha=0.5,  linewidth=1) + 
   # counter factual with no conflict deaths
   # geom_line(data = dt_ex %>% filter(year > 2022), 
   #            aes(x = year, y = ex_noc, color=region),  group = "Life Expectancy (no conflict)", alpha = 0.5, size = 1.5)+
-  stat_histinterval(data=le_lss_all %>% filter(region != "West Bank"), aes(x = year, y=ex, group=region, 
+  stat_histinterval(data=le_lss_all %>%
+                      filter(sex != "Total"), aes(x = year, y=ex, group=region, 
                                          fill=region, color=region),
                     size=2,
                     alpha=0.5) +
+  geom_point(data = le_lss_all %>%
+               filter(sex != "Total") %>% filter(year >= 2023) %>%
+               group_by(region, year, sex, scenario) %>%
+               mutate(ex_mean = mean(ex)),
+             aes(x = year, y = ex_mean, color=region, pch =  region),  alpha = 1, size = 3) + 
   # scale_color_manual(values = c("#de5138", "#5a9cee", "#E69F00")) + 
   scale_color_manual("",values = c("#ef476f", "#FFA500", "#118ab2"),
                      labels = c( 
                        "Gaza Strip",
                        "Palestine",
                        "West Bank"),guide = 'none') + 
-  scale_fill_manual(values = c("#ef476f", "#FFA500", "#118ab2"),guide = 'none'
+  scale_fill_manual(values = c("#ef476f", "#FFA500", "#118ab2"), name  = "Region") +
                     # ,labels = c(
                     #  "GMoH", 
                     #  "Historical\naverage",
                     #  "UN-IGME")
-  ) + xlab("") +
+  xlab("") +
   #scale_fill_manual(values=c("#fe9441","#85b5cd", "#DE9D0D")) + 
   facet_grid(~sex, scale = "free_y", space = "free_y", switch = "y") +
   scale_linetype_discrete(name="")+
   guides(shape = "none") +
   theme_bw()+
+  scale_x_continuous(breaks = seq(2012, 2024, 2)) +
   # guides(color = guide_legend(override.aes = list(linetype = 0)),
   #        linetype = guide_legend(order = 1))+ 
   theme(strip.background = element_blank(),
@@ -164,20 +173,26 @@ gaza_24_all <- rbind(gaza_le_f_24[,vars], gaza_le_m_24[,vars], gaza_le_t_24[,var
 gaza_24_all$region="Gaza Strip"
 
 ## replace with names of the WB lifetables 
-wb_24_all <- read_rds(paste0(results_dir, "west_bank/lifetable_age0_wb_24.rds")) 
+wb_24_all <- read_rds(paste0(results_dir, "west_bank/lifetable_age0_wb_24_v2.rds")) 
 wb_all$region="West Bank"
 
 le_lss_all24 <- rbind(nat_24_all, gaza_24_all, wb_24_all)
 
 
 ## add 2024 to the plots 
-le0_23_24  <- le0_plot +  stat_histinterval(data=le_lss_all24 %>% filter(region != "West Bank"), aes(x = year, y=ex, group=region, 
+le0_23_24  <- le0_plot +  stat_histinterval(data=le_lss_all24  %>%
+                                              filter(sex != "Total"), aes(x = year, y=ex, group=region, 
                                                                    fill=region, color=region),
                                size=2,
-                               alpha=0.5) 
+                               alpha=0.5) +
+  geom_point(data = le_lss_all24  %>%
+               filter(sex != "Total") %>% filter(year >= 2023) %>%
+               group_by(region, year, sex, scenario) %>%
+               mutate(ex_mean = mean(ex)),
+             aes(x = year, y = ex_mean,color=region, pch =  region),  alpha = 1, size = 3) 
 
 
-lss_23_24  <-  lss_plot +  stat_histinterval(data=le_lss_all24%>%filter(region != "West Bank"), aes(x = year, y=bmmr_lss, group=region, 
+lss_23_24  <-  lss_plot +  stat_histinterval(data=le_lss_all24, aes(x = year, y=bmmr_lss, group=region, 
                                                     fill=region, color=region),
                                size=2,
                                alpha=0.5) 
@@ -211,11 +226,11 @@ focus_male <- ggplot() +
         strip.placement = "outside",
         strip.text = element_blank(),
         legend.position = "bottom",
-        legend.text = element_text(size = 12),
-        legend.title = element_text(size = 13),
+        legend.text = element_text(size = 8),
+        legend.title = element_text(size = 8),
         axis.title.y = element_blank(),
-        axis.text = element_text(size = 11),
-        axis.title = element_text(size = 12)) +
+        axis.text = element_text(size = 8),
+        axis.title = element_text(size = 8)) +
   stat_histinterval(data=le_lss_all24 %>% filter(region != "West Bank" & sex == "Males"), 
                     aes(x = year, y=ex, group=region, 
                         fill=region, color=region),
@@ -233,12 +248,18 @@ annotation_custom2 <- function (grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax
   }
 
 embedded_grob <- ggplotGrob(focus_male)
+embedded_grob_f <- ggplotGrob(focus_female)
 
 # Combine the plots
 le0_23_24_2 <- le0_23_24 +
   # annotation_custom(grob = embedded_grob, xmin = 2012, xmax = 2020, ymin = 25, ymax = 60)
   annotation_custom2(grob=embedded_grob, 
                      data = data.frame(sex="Males"),
-                     xmin = 2012, xmax = 2021, ymin = 25, ymax = 60)
+                     xmin = 2012, xmax = 2021, ymin = 30, ymax = 60) +
+  annotation_custom2(grob=embedded_grob_f, 
+                     data = data.frame(sex="Females"),
+                     xmin = 2012, xmax = 2021, ymin = 30, ymax = 60)
 
 le0_lss_23_24 <- gridExtra::grid.arrange(le0_23_24_2, lss_23_24)
+
+ggsave(le0_23_24_2, file = "figures/LE_regions_zoom.pdf", height = 6.32, width = 9.12)
