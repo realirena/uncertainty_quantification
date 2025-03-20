@@ -73,10 +73,10 @@ le_lss_all |>
 
 ## plot of life expectancies at birth 
 le0_plot <- ggplot() +   
-  geom_point(data = dt_gaza %>% filter(year <= 2022), 
-             aes(x = year, y = ex_cnf, color="Life Expectancy (observed)"), color="black", alpha = 1, size = 1.5) + 
-  geom_line(data =dt_gaza, aes(year, ex_noc, linetype = "Life Expectancy (no conflict)"),  alpha = 0.5,
-            col = "black", linewidth=1) + 
+  # geom_point(data = dt_gaza %>% filter(year <= 2022), 
+  #            aes(x = year, y = ex_cnf, color="Life Expectancy (observed)"), color="black", alpha = 1, size = 1.5) + 
+  # geom_line(data =dt_gaza, aes(year, ex_noc, linetype = "Life Expectancy (no conflict)"),  alpha = 0.5,
+  #           col = "black", linewidth=1) + 
   # counter factual with no conflict deaths
   stat_histinterval(data=le_lss_all, aes(x = year, 
                                          y=ex, group=scenario, 
@@ -84,24 +84,25 @@ le0_plot <- ggplot() +
                                          color=scenario),
                     size=2,
                     alpha=0.5) +
+  geom_point(data = le_lss_all %>% filter(year >= 2023) %>%
+               group_by(year, sex, scenario) %>%
+               mutate(ex_mean = mean(ex)),
+             aes(x = year, y = ex_mean, color=scenario, pch =  scenario),  alpha = 1, size = 3) + 
   # scale_color_manual(values = c("#de5138", "#5a9cee", "#E69F00")) + 
-  scale_color_manual("",values = c("#FFA500","#ef476f",  "#118ab2"),
-                  labels=  c("B'Tselem historical average","GMoH report",  "UN-IGME pattern")
-                   ) + 
-  scale_fill_manual(values = c( "#FFA500", "#ef476f", "#118ab2"),
+  scale_color_manual("",values = c("#07c8ba","#ef476f",  "#3aab07"),
+                     labels=  c("B'Tselem historical average","GMoH report",  "UN-IGME pattern")
+  ) + 
+  scale_fill_manual(values = c("#07c8ba","#ef476f",  "#3aab07"),
                     labels=  c("B'Tselem historical average","GMoH report",  "UN-IGME pattern"),
-                    guide = 'none'
-                    # ,labels = c(
-                    #  "GMoH", 
-                    #  "Historical\naverage",
-                    #  "UN-IGME")
-  ) +
+                    guide='none') +
+  xlab("Year") + ylab("Life expectancy at birth") + 
+  scale_x_continuous(breaks = c(2023,2024)) +
   #scale_fill_manual(values=c("#fe9441","#85b5cd", "#DE9D0D")) + 
   facet_grid(~sex, scale = "free_y", space = "free_y", switch = "y") +
   scale_linetype_discrete(name="")+
   theme_bw()+
   guides(color = guide_legend(override.aes = list(linetype = 0)),
-         linetype = guide_legend(order = 1))+ 
+         linetype = guide_legend(order = 1),  shape = "none")+ 
   theme(strip.background = element_blank(),
         strip.placement = "outside",
         strip.text = element_text(size = 13),
@@ -114,15 +115,15 @@ le0_plot <- ggplot() +
 
 ## plot of life expectancy loss (subtract each estimated le0 from 76)
 lss_plot <-  ggplot() +   
-  geom_point(data = dt_gaza %>% filter(year <= 2022), 
-             aes(x = year, y = lss), color="black", alpha = 0.5, size = 1) +   
+  # geom_point(data = dt_gaza %>% filter(year <= 2022), 
+  #            aes(x = year, y = lss), color="black", alpha = 0.5, size = 1) +   
   stat_histinterval(data=le_lss_all, aes(x = year, y=bmmr_lss, group=scenario, fill=scenario, color=scenario), alpha=0.5) +
   # scale_color_manual(values = c("#de5138", "#5a9cee", "#E69F00")) + 
   # scale_fill_manual(values=c("#fe9441","#85b5cd", "#DE9D0D")) + 
-  scale_color_manual("",values = c("#FFA500","#ef476f",  "#118ab2"),
+  scale_color_manual("",values = c("#07c8ba","#ef476f",  "#3aab07"),
                      labels=  c("B'Tselem historical average","GMoH report",  "UN-IGME pattern")
   ) + 
-  scale_fill_manual(values = c( "#FFA500", "#ef476f", "#118ab2"),
+  scale_fill_manual(values = c("#07c8ba","#ef476f",  "#3aab07"),
                     labels=  c("B'Tselem historical average","GMoH report",  "UN-IGME pattern"),
                     guide='none'
   ) +
@@ -175,7 +176,11 @@ le_lss_all24 <- rbind(moh_24_all, bts24_all, un_conflict24_all)
 le0_23_24  <- le0_plot +  stat_histinterval(data=le_lss_all24, aes(x = year, y=ex, group=scenario, 
                                                     fill=scenario, color=scenario),
                                size=2,
-                               alpha=0.5) 
+                               alpha=0.5) +
+  geom_point(data = le_lss_all24 %>% filter(year >= 2023) %>%
+               group_by(year, sex, scenario) %>%
+               mutate(ex_mean = mean(ex)),
+             aes(x = year, y = ex_mean, color=scenario, pch =  scenario),  alpha = 1, size = 3) 
 
 
 lss_23_24  <-  lss_plot +  stat_histinterval(data=le_lss_all24, aes(x = year, y=bmmr_lss, group=scenario, 
@@ -248,6 +253,8 @@ le0_lss_23_24 <- gridExtra::grid.arrange(le0_23_24_2, lss_23_24)
 
 # ggsave("figures/un_conflict_pix/le0_lss_gaza_23_24.png", plot=le0_lss_23_24,
 #        w = 16, h = 8)
+
+ggsave(le0_23_24, file = "figures/LE_sources_zoom.pdf", width = 8.75, height = 5.25)
 
 ##### --------------------------
 ###UN genocide results 
