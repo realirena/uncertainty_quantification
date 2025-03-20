@@ -237,6 +237,41 @@ focus_male <- ggplot() +
                     size=2,
                     alpha=0.5) 
 
+focus_female <- ggplot() + 
+  stat_histinterval(data=le_lss_all %>% filter(region != "West Bank" & sex == "Females"), 
+                    aes(x = year, y=ex, group=region, 
+                        fill=region, color=region),
+                    size=2,
+                    alpha=0.5) +
+  # scale_color_manual(values = c("#de5138", "#5a9cee", "#E69F00")) + 
+  scale_color_manual("",values = c("#ef476f", "#FFA500", "#118ab2"),
+                     labels = c( 
+                       "Gaza Strip",
+                       "Palestine",
+                       "West Bank"),guide = 'none') + 
+  scale_fill_manual(values = c("#ef476f", "#FFA500", "#118ab2"),guide = 'none') + xlab("") +
+  # scale_fill_manual(values=c("#fe9441","#85b5cd", "#DE9D0D")) +
+  facet_grid(~sex, scale = "free_y", space = "free_y", switch = "y") +
+  guides(shape = "none", linetype = "none") +
+  theme_bw()+
+  scale_x_continuous(breaks = c(2023,2024)) +
+  # guides(color = guide_legend(override.aes = list(linetype = 0)),
+  #        linetype = guide_legend(order = 1))+ 
+  theme(strip.background = element_blank(),
+        strip.placement = "outside",
+        strip.text = element_blank(),
+        legend.position = "bottom",
+        legend.text = element_text(size = 8),
+        legend.title = element_text(size = 8),
+        axis.title.y = element_blank(),
+        axis.text = element_text(size = 8),
+        axis.title = element_text(size = 8)) +
+  stat_histinterval(data=le_lss_all24 %>% filter(region != "West Bank" & sex == "Females"), 
+                    aes(x = year, y=ex, group=region, 
+                        fill=region, color=region),
+                    size=2,
+                    alpha=0.5) 
+
 
 ## This function allows us to specify which facet to annotate
 annotation_custom2 <- function (grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf, data) {
@@ -255,10 +290,10 @@ le0_23_24_2 <- le0_23_24 +
   # annotation_custom(grob = embedded_grob, xmin = 2012, xmax = 2020, ymin = 25, ymax = 60)
   annotation_custom2(grob=embedded_grob, 
                      data = data.frame(sex="Males"),
-                     xmin = 2012, xmax = 2021, ymin = 30, ymax = 60) +
+                     xmin = 2013, xmax = 2018, ymin = 28, ymax = 65) +
   annotation_custom2(grob=embedded_grob_f, 
                      data = data.frame(sex="Females"),
-                     xmin = 2012, xmax = 2021, ymin = 30, ymax = 60)
+                     xmin = 2013, xmax = 2018, ymin = 28, ymax = 65)
 
 le0_lss_23_24 <- gridExtra::grid.arrange(le0_23_24_2, lss_23_24)
 
