@@ -11,9 +11,9 @@ setwd("U:/Documents/repos/uncertainty_quantification/")
 source("R/0_setup.R")
 ## set the working directory
 model_dir <- paste0(getwd(),"/R/model/")
-results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2022/2023/gaza_incl_combatants/")
+results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2019/2024/gaza_bu/")
 ## load the 2024 moh age distributions (as an example)
-pi_x_moh <- readRDS("data/pi_x_moh_2023_gaza.rds")
+pi_x_moh <- readRDS("data/pi_x_moh_2024.rds")
 ## get the sex-specific age distributions 
 pi_x_moh <- pi_x_moh[pi_x_moh$sex!="t",]
 
@@ -26,7 +26,6 @@ pi_ll = spread(pi_x_moh[,c("sex", "age", "pi_x_ll")], key=age, value=pi_x_ll)
 ## we want E(log(theta)) and sd(log(theta)), so apply Delta method to the means and sds: 
 pi_mu = log(pi_x[,-1])
 pi_sd = pi_sds[,-1]/pi_x[,-1]
-
 
 ##-------------------------------
 ## read in the exposure and the forecasted baseline mortality 
@@ -45,7 +44,7 @@ E = sum(rowSums(E_x[,-1]))
 ## reshape the forecasted baseline mortality as well 
 pcbs_mx<-  master_forecast_dt[master_forecast_dt$region=="Gaza Strip"&master_forecast_dt$year==2024&master_forecast_dt$sex%in%c("m", "f")&master_forecast_dt$source=="lc_pcbs_2022",]
 D_x_pcbs= spread(pcbs_mx[,c("sex", "age","mx_noc")], key=age, value=mx_noc)
-
+#D_x_int = round(D_x_pcbs[,-1])
 ## age-sex specific mortality rates 
 mu_x_pcbs <-  (D_x_pcbs[,-1])/E_x[,-1] 
 ## age specific mortality 
@@ -72,7 +71,7 @@ compiled_model <- stan_model(paste0(model_dir, "bmmr_coverage_intervals.stan"))
 
 model_out <- sampling(compiled_model,
                       # include = TRUE,
-                      sample_file=paste0(results_dir, 'moh_samples.csv'), #writes the samples to CSV file
+                     sample_file=paste0(results_dir, 'moh_samples.csv'), #writes the samples to CSV file
                       iter =2000,
                       warmup=1000, #BURN IN
                       chains =4,
@@ -82,7 +81,8 @@ model_out <- sampling(compiled_model,
                       data = list(
                         mu_x_noc = mu_x_pcbs, ##  baseline mortality
                         mu_age_noc = mu_age_pcbs, # WPP age baseline 
-                        E_x = E_x[,-1],
+                        D_baseline = round(D_x_pcbs[,-1]),
+                        E_x = round(E_x[,-1]),
                         E_age = E_age,
                         pi_x_hat = pi_mu,
                         pi_sd = pi_sd, 
@@ -93,6 +93,8 @@ model_out <- sampling(compiled_model,
 # 
 # rstan::traceplot(model_out, pars=c("mu_age_total[1]", "pi_x[1,1]", "pi_x[1,3]", "pr"))
 rstan::traceplot(model_out, pars=c("pr", "pi_x[1,1]", "pi_x[2,1]"))
+rstan::traceplot(model_out, pars=c("pi_x[2,1]", "pi_x[1,1]","mu_x_total[1,1]"))
+
 pairs(model_out, pars=c("pi_x[2,1]", "pi_x[1,1]","mu_x_total[1,1]", "mu_age_total[1]", "lp__"))
 other_pars <- data.frame(summary(model_out, pars=c("pi_x"))$summary)
 
