@@ -11,9 +11,9 @@ setwd("U:/Documents/repos/uncertainty_quantification/")
 source("R/0_setup.R")
 ## set the working directory
 model_dir <- paste0(getwd(),"/R/model/")
-results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2022/2024/gaza/")
+results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2022/2023/gaza_incl_combatants/")
 ## load the 2024 moh age distributions (as an example)
-pi_x_moh <- readRDS("data/pi_x_moh_2024.rds")
+pi_x_moh <- readRDS("data/pi_x_moh_2023_gaza.rds")
 ## get the sex-specific age distributions 
 pi_x_moh <- pi_x_moh[pi_x_moh$sex!="t",]
 
