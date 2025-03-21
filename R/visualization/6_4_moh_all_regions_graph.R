@@ -66,7 +66,8 @@ le0_plot <- ggplot() +
                filter(sex != "Total"),
              aes(x = year, y = ex_cnf,color=region, pch =  region),  alpha = 1, size = 3) + 
   geom_line(data = dt_ex%>%
-              filter(sex != "Total"), aes(year, ex_noc, color=region, group=region, linetype = "Life Expectancy (no conflict)"),alpha=0.5,  linewidth=1) + 
+              filter(sex != "Total"), aes(year, ex_noc, color=region, group=region, 
+                                          linetype = "Life Expectancy (no conflict)"),alpha=0.5,  linewidth=1) + 
   # counter factual with no conflict deaths
   # geom_line(data = dt_ex %>% filter(year > 2022), 
   #            aes(x = year, y = ex_noc, color=region),  group = "Life Expectancy (no conflict)", alpha = 0.5, size = 1.5)+
@@ -91,7 +92,7 @@ le0_plot <- ggplot() +
                     #  "GMoH", 
                     #  "Historical\naverage",
                     #  "UN-IGME")
-  xlab("") +
+  xlab("Year") + ylab("Life exepcatncy at birth") +
   #scale_fill_manual(values=c("#fe9441","#85b5cd", "#DE9D0D")) + 
   facet_grid(~sex, scale = "free_y", space = "free_y", switch = "y") +
   scale_linetype_discrete(name="")+
@@ -106,7 +107,6 @@ le0_plot <- ggplot() +
         legend.position = "bottom",
         legend.text = element_text(size = 12),
         legend.title = element_text(size = 13),
-        axis.title.y = element_blank(),
         axis.text = element_text(size = 11),
         axis.title = element_text(size = 12))
 
@@ -228,9 +228,10 @@ focus_male <- ggplot() +
         legend.position = "bottom",
         legend.text = element_text(size = 8),
         legend.title = element_text(size = 8),
-        axis.title.y = element_blank(),
+        axis.title = element_blank(),
         axis.text = element_text(size = 8),
-        axis.title = element_text(size = 8)) +
+        plot.background = element_rect(color = NA, fill = "lightgrey", linewidth = 1), 
+        panel.grid.minor = element_blank()) +
   stat_histinterval(data=le_lss_all24 %>% filter(region != "West Bank" & sex == "Males"), 
                     aes(x = year, y=ex, group=region, 
                         fill=region, color=region),
@@ -263,9 +264,10 @@ focus_female <- ggplot() +
         legend.position = "bottom",
         legend.text = element_text(size = 8),
         legend.title = element_text(size = 8),
-        axis.title.y = element_blank(),
+        axis.title = element_blank(),
         axis.text = element_text(size = 8),
-        axis.title = element_text(size = 8)) +
+        plot.background = element_rect(color = NA, fill = "lightgrey", linewidth = 1), 
+        panel.grid.minor = element_blank()) +
   stat_histinterval(data=le_lss_all24 %>% filter(region != "West Bank" & sex == "Females"), 
                     aes(x = year, y=ex, group=region, 
                         fill=region, color=region),
@@ -285,6 +287,9 @@ annotation_custom2 <- function (grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax
 embedded_grob <- ggplotGrob(focus_male)
 embedded_grob_f <- ggplotGrob(focus_female)
 
+rect_data_m <- data.frame(xmin = c(2022), xmax = c(2025), ymin = c(28), ymax = c(58), sex = "Males")
+rect_data_f <- data.frame(xmin = c(2022), xmax = c(2025), ymin = c(38), ymax = c(63), sex = "Females")
+
 # Combine the plots
 le0_23_24_2 <- le0_23_24 +
   # annotation_custom(grob = embedded_grob, xmin = 2012, xmax = 2020, ymin = 25, ymax = 60)
@@ -293,7 +298,17 @@ le0_23_24_2 <- le0_23_24 +
                      xmin = 2013, xmax = 2018, ymin = 28, ymax = 65) +
   annotation_custom2(grob=embedded_grob_f, 
                      data = data.frame(sex="Females"),
-                     xmin = 2013, xmax = 2018, ymin = 28, ymax = 65)
+                     xmin = 2013, xmax = 2018, ymin = 28, ymax = 65) +
+  geom_rect(data = rect_data_m, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+            fill = NA, color = "black", linewidth = 0.5, linetype = 2)  +
+  geom_rect(data = rect_data_f, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+            fill = NA, color = "black", linewidth = 0.5, linetype = 2)  +
+  geom_segment(data = rect_data_m, aes(x = 2022, xend = 2017.8, y = 28, yend = 31), size = 0.5) +
+  geom_segment(data = rect_data_m, aes(x = 2022, xend = 2017.8, y = 58, yend = 64), size = 0.5) +
+  geom_segment(data = rect_data_f, aes(x = 2022, xend = 2017.8, y = 38, yend = 31), size = 0.5) +
+  geom_segment(data = rect_data_f, aes(x = 2022, xend = 2017.8, y = 63, yend = 64), size = 0.5)
+
+le0_23_24_2
 
 le0_lss_23_24 <- gridExtra::grid.arrange(le0_23_24_2, lss_23_24)
 
