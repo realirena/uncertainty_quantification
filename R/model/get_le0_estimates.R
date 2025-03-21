@@ -69,9 +69,9 @@ all_lifetable_t <- Reduce(rbind,lifetable_t)
 
 
 ## scenarios:  "GMoH report", "B'Tselem historical average", "UN-IGME pattern"
-lifetable_f_age0 <- get_le0_dt(all_lifetable_f, "Females", 2024,   "GMoH report", le0= le_noc_list[[4]])
-lifetable_m_age0 <- get_le0_dt(all_lifetable_m, "Males", 2024,   "GMoH report" le0= le_noc_list[[4]])
-lifetable_t_age0 <- get_le0_dt(all_lifetable_t, "Total", 2024,  "GMoH report", le0= le_noc_list[[4]])
+lifetable_f_age0 <- get_le0_dt(all_lifetable_f, "Females", 2023,   "GMoH report", le0= le_noc_list[[1]])
+lifetable_m_age0 <- get_le0_dt(all_lifetable_m, "Males", 2023,   "GMoH report" ,le0= le_noc_list[[1]])
+lifetable_t_age0 <- get_le0_dt(all_lifetable_t, "Total", 2023,  "GMoH report", le0= le_noc_list[[1]])
 
 ## histograms of the estimated life expectancies after accounting for reporting rate error 
 hist(lifetable_f_age0$ex)
