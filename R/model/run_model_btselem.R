@@ -89,8 +89,7 @@ model_out <- sampling(compiled_model,
                       data = list(
                         mu_x_noc = mu_x_pcbs, ## WPP baseline mortality
                         mu_age_noc = mu_age_pcbs, ## WPP age baseline 
-                        D_baseline = round(D_x_pcbs[,-1]),
-                        E_x = round(E_x[,-1]),
+                        E_x = E_x,
                         E_age = E_age,
                         pi_x_hat = pi_mu, ##means of the age distributions
                         pi_sd = pi_sd, 

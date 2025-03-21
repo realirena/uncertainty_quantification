@@ -27,10 +27,10 @@ pi_x_un_geno <- pi_x_un[pi_x_un$scenario=="genocide",]
 pi_x_un_earth <- pi_x_un[pi_x_un$scenario=="earthquake",]
 
 
-pi_x= spread(pi_x_un_earth[,c("sex", "age", "pi_x_mean")], key=age, value=pi_x_mean)
-pi_sds= spread(pi_x_un_earth[,c("sex", "age", "pi_x_sd")], key=age, value=pi_x_sd)
-pi_ul = spread(pi_x_un_earth[,c("sex", "age", "pi_x_ul")], key=age, value=pi_x_ul)
-pi_ll = spread(pi_x_un_earth[,c("sex", "age", "pi_x_ll")], key=age, value=pi_x_ll)
+pi_x= spread(pi_x_un_conflict[,c("sex", "age", "pi_x_mean")], key=age, value=pi_x_mean)
+pi_sds= spread(pi_x_un_conflict[,c("sex", "age", "pi_x_sd")], key=age, value=pi_x_sd)
+pi_ul = spread(pi_x_un_conflict[,c("sex", "age", "pi_x_ul")], key=age, value=pi_x_ul)
+pi_ll = spread(pi_x_un_conflict[,c("sex", "age", "pi_x_ll")], key=age, value=pi_x_ll)
 ## parameters for the age distribution priors 
 ## Delta method for E(log(theta))
 pi_mu = log(pi_x[,-1])
@@ -85,7 +85,7 @@ compiled_model <- stan_model(paste0(model_dir, "bmmr_coverage_intervals_truncate
 
 model_out <- sampling(compiled_model,
                     # include = TRUE,
-                  sample_file=paste0(results_dir, 'un_dist_earth.csv'), #writes the samples to CSV file
+                  sample_file=paste0(results_dir, 'un_dist_conflict.csv'), #writes the samples to CSV file
                     iter =2000,
                     warmup=1000, #BURN IN
                     chains =4,
@@ -95,8 +95,7 @@ model_out <- sampling(compiled_model,
                   data = list(
                     mu_x_noc = mu_x_pcbs, ## WPP baseline mortality
                     mu_age_noc = mu_age_pcbs, ## WPP age baseline 
-                    D_baseline = round(D_x_pcbs[,-1]),
-                    E_x = round(E_x[,-1]),
+                    E_x = E_x,
                     E_age = E_age,
                     pi_x_hat = pi_mu, ##means of the age distributions
                     pi_sd = pi_sd, 
