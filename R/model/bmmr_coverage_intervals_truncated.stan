@@ -45,7 +45,6 @@ transformed parameters {
   row_vector[X] R_age; 
   vector[X] mu_age; 
   vector[X] mu_age_total; 
-  matrix[S,X] mu_age_poi; //
   matrix[S,X] D_baseline_tmp; // life expectancy
   real tmp;
   matrix[S, X] mu_x; // mortality rate in each age-sex group 
