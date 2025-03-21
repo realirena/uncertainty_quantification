@@ -74,7 +74,7 @@ transformed parameters {
  // D_baseline_age = v_ones*D_baseline_tmp; 
   for(x in 1:X){
     mu_age[x] = log(R_age[x]/E_age[x]) -log(pr); 
-    mu_age_total[x] = exp(mu_age[x]); //mortality over sexes 
+    mu_age_total[x] = exp(mu_age[x]) + mu_age_noc[x]; //mortality over sexes 
   }
    
 }

@@ -11,14 +11,15 @@ source("R/0_setup.R")
 ## set the working directory
 setwd("U:/Documents/repos/uncertainty_quantification")
 model_dir <- paste0(getwd(),"/R/model/")
-results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2019/2024/palestine_bu/")
+results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2019/2024/gaza_bu/")
 
 le0_noc <- readRDS("data/ex0_noc.rds")
 le0_noc_23 <- le0_noc[le0_noc$year==2023&le0_noc$source=="lc_pcbs_2019"&le0_noc$region=="Gaza Strip",]
 ## read in age distributions
-pi_x_oct26 <- readRDS("data_inter/pi_x_moh_2023_gaza.rds")
-pi_x_oct26 <- pi_x_oct26[pi_x_oct26$sex!="t",]
-
+pi_x <- readRDS("data/pi_x_moh_2024.rds")
+pi_x <- pi_x[pi_x$sex!="t",]
+pi_spread <- spread(pi_x[,c("sex", "age", "pi_x_mean")], key=age, value=pi_x_mean)
+x <- as.numeric(colnames(pi_spread)[2:19])
 ### estimated LE's (noc) by region and sex
 le_noc_list <- list( 
   c(78.2272,74.95395, 76.67211), ## gaza 2023
@@ -29,7 +30,7 @@ le_noc_list <- list(
 
 
 ## read in samples 
-file_names <- c("moh_samples_1", "moh_samples_2", "moh_samples_3", "moh_samples_4")
+file_names <- c("bts_samples_1", "bts_samples_2", "bts_samples_3", "bts_samples_4")
 model_out <- read_stan_csv(paste0(results_dir, file_names,".csv"))
 
 ### extract the model-generated mortality distributions (incl WPP deaths)
@@ -43,7 +44,6 @@ mu_age_total =  rstan::extract(model_out, pars=c("mu_age_total"))$mu_age_total
 lifetable_m  <- list()
 lifetable_f  <- list()
 lifetable_t <- list()
-x <- pi_x_oct26$age[1:18]
 
 num_iter <- dim(mu_x_total)[1] ## grab the number of MCMC iterations 
 ## alternative: if we don't want to use all of the samples, we can just use a random sample of iterations 
@@ -67,11 +67,10 @@ all_lifetable_f <- Reduce(rbind,lifetable_f)
 all_lifetable_m <- Reduce(rbind,lifetable_m)
 all_lifetable_t <- Reduce(rbind,lifetable_t)
 
-
 ## scenarios:  "GMoH report", "B'Tselem historical average", "UN-IGME pattern"
-lifetable_f_age0 <- get_le0_dt(all_lifetable_f, "Females", 2023,   "GMoH report", le0= le_noc_list[[1]])
-lifetable_m_age0 <- get_le0_dt(all_lifetable_m, "Males", 2023,   "GMoH report" ,le0= le_noc_list[[1]])
-lifetable_t_age0 <- get_le0_dt(all_lifetable_t, "Total", 2023,  "GMoH report", le0= le_noc_list[[1]])
+lifetable_f_age0 <- get_le0_dt(all_lifetable_f, "Females", 2024,"B'Tselem historical average", le0= le_noc_list[[2]])
+lifetable_m_age0 <- get_le0_dt(all_lifetable_m, "Males", 2024, "B'Tselem historical average" ,le0= le_noc_list[[2]])
+lifetable_t_age0 <- get_le0_dt(all_lifetable_t, "Total", 2024, "B'Tselem historical average", le0= le_noc_list[[2]])
 
 ## histograms of the estimated life expectancies after accounting for reporting rate error 
 hist(lifetable_f_age0$ex)
@@ -109,7 +108,7 @@ g3 <- ggplot(data=lifetable_t_age0, aes(x=ex)) +
 
 gridExtra::grid.arrange(g1, g2, g3, ncol=3)
 
-write.csv(lifetable_m_age0, paste0(results_dir, "moh_lifetable_m_le0.csv"), row.names = FALSE)
-write.csv(lifetable_f_age0, paste0(results_dir, "moh_lifetable_f_le0.csv"), row.names = FALSE)
-write.csv(lifetable_t_age0, paste0(results_dir, "moh_lifetable_t_le0.csv"), row.names = FALSE)
+write.csv(lifetable_m_age0, paste0(results_dir, "bts_lifetable_m_le0.csv"), row.names = FALSE)
+write.csv(lifetable_f_age0, paste0(results_dir, "bts_lifetable_f_le0.csv"), row.names = FALSE)
+write.csv(lifetable_t_age0, paste0(results_dir, "bts_lifetable_t_le0.csv"), row.names = FALSE)
 
