@@ -66,7 +66,7 @@ transformed parameters {
       R_x[s,x] =pi_x[s,x]*R; // generating each R_x from the age distributions 
       log_mu_x[s,x] = log(R_x[s,x]/E_x[s,x]) -log(pr); //compute the age-specific mortality rates 
       mu_x[s,x] = exp(log_mu_x[s,x]);  //exponentiate the mortality 
-      mu_x_total[s,x] =  mu_x[s,x]; 
+      mu_x_total[s,x] =  mu_x[s,x] + mu_x_noc[s,x]; 
      }
   }
   
@@ -74,7 +74,7 @@ transformed parameters {
  // D_baseline_age = v_ones*D_baseline_tmp; 
   for(x in 1:X){
     mu_age[x] = log(R_age[x]/E_age[x]) -log(pr); 
-    mu_age_total[x] = exp(mu_age[x]); //mortality over sexes 
+    mu_age_total[x] = exp(mu_age[x]) + mu_age_noc[x]; //mortality over sexes 
   }
    
 }
