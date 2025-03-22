@@ -10,8 +10,8 @@ setwd("U:/Documents/repos/uncertainty_quantification/")
 ## load the functions to calculate life expectancy 
 source("R/0_setup.R")
 ## set the working directory
-model_dir <- paste0(getwd(),"/R/model/")
-results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2019/2024/gaza_bu/")
+model_dir <- paste0(getwd(),"/R/sensitivity_check/")
+results_dir <- paste0(getwd(),"/R/sensitivity_check/samples/")
 ## load the 2024 moh age distributions (as an example)
 pi_x_moh <- readRDS("data/pi_x_moh_2024.rds")
 ## get the sex-specific age distributions 
@@ -76,7 +76,7 @@ x <- as.numeric(colnames(mu_x_pcbs))
 ##-------------------------------
 
 ## compile the model 
-compiled_model <- stan_model(paste0(model_dir, "bmmr_coverage_intervals.stan"))
+compiled_model <- stan_model(paste0(model_dir, "bmmr_change_prior.stan"))
 
 model_out <- sampling(compiled_model,
                       # include = TRUE,

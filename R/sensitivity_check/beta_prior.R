@@ -12,6 +12,7 @@ options(mc.cores = parallel::detectCores(logical= FALSE))
 ### play around with some prior distributions for the reporting rate: 
 set.seed(1234)
 pr_prior = data.frame(rbeta(10000, 2, 2)*0.14 + 0.52)
+pr_prior = data.frame(rbeta(20000, 3,3)*0.4 + 0.8)
 names(pr_prior) <- "x"
 mean(pr_prior$x)
 
