@@ -19,6 +19,9 @@ data {
   matrix[S,X] pi_sd; // lower bounds for the age distribution estimates 
   matrix[S,X] mu_x_noc; //baseline mortality from the WPP 
   vector[X] mu_age_noc; // age specific baseline mortality
+  matrix [S,X] U; 
+  matrix[S,X] L; 
+  int<lower=0, upper=1> trunc_ind; 
 }
 
 transformed data {
@@ -29,7 +32,7 @@ row_vector[S] v_ones = rep_row_vector(1, S);
 
 // The parameters accepted by the model
 parameters {
-  matrix[S,X] theta_x; 
+   matrix<lower= L, upper=U>[S,X] theta_x;
   real<lower=0, upper=1> pr_raw; // overreporting or underreporting rate 
   
 }
@@ -84,7 +87,11 @@ model {
  
   for(s in 1:S){
       for(x in 1:X){
-        theta_x[s,x] ~ normal(pi_x_hat[s,x], pi_sd[s,x]);
+        if(trunc_ind==1){
+           theta_x[s,x] ~ normal(pi_x_hat[s,x], pi_sd[s,x]) T[L[s,x], U[s,x]];
+        } else {
+           theta_x[s,x] ~ normal(pi_x_hat[s,x], pi_sd[s,x]); 
+        }
        // priors on the age distributions - the model works without this, but this could also help w/ identifiability (see Schmertmann 2018)
        //  D_baseline[s,x] ~ poisson(E_x[s,x]*mu_x_noc[s,x]); 
       }

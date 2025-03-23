@@ -13,10 +13,14 @@ source("R/0_setup.R")
 model_dir <- paste0(getwd(),"/R/sensitivity_check/")
 results_dir <- paste0(getwd(),"/R/sensitivity_check/samples/")
 ## load the 2024 moh age distributions (as an example)
-pi_x_moh <- readRDS("data/pi_x_moh_2024.rds")
+## un age dists: pi_x_un_2023_2024_gaza
+#bts age dists: pi_x_btselem_2023_2024_gaza
+pi_x_moh <- readRDS("data/pi_x_moh_2023_2024_gaza.rds")
+
 ## get the sex-specific age distributions 
 pi_x_moh <- pi_x_moh[pi_x_moh$sex!="t",]
-
+## un onyl: 
+#pi_x_moh <- pi_x_moh[pi_x_moh$scenario=="genocide",]
 ## reshape the age distributions for the shape that we need for the model 
 pi_x= spread(pi_x_moh[,c("sex", "age", "pi_x_mean")], key=age, value=pi_x_mean)
 pi_sds= spread(pi_x_moh[,c("sex", "age", "pi_x_sd")], key=age, value=pi_x_sd)
@@ -32,18 +36,27 @@ pi_sd = pi_sds[,-1]/pi_x[,-1]
 ##-------------------------------
 ## read in exposure data:
 master_forecast_dt <- readRDS("R/lc/data_plus_forecasts_v2.rds")
-pcbs_exp  <- master_forecast_dt[master_forecast_dt$region=="Gaza Strip"&master_forecast_dt$year==2024&master_forecast_dt$sex%in%c("m", "f")&master_forecast_dt$source=="pcbs",]
+pcbs_exp  <- master_forecast_dt[master_forecast_dt$region=="Gaza Strip"&master_forecast_dt$year%in%c(2023,2024)&master_forecast_dt$sex%in%c("m", "f")&master_forecast_dt$source=="pcbs",]
 ## number of exposures by age
-E_x = spread(pcbs_exp[,c("sex", "age","pop")], key=age, value=pop)
+
+pcbs_ex_23_24 <- pcbs_exp |> 
+  group_by(sex, age) |>
+  summarise(mean_pop = mean(pop))
+
+E_x = spread(pcbs_ex_23_24[,c("sex", "age","mean_pop")], key=age, value=mean_pop)
 ## exposures by age 
 E_age =colSums(E_x[,-1])
 ## get total exposures 
 E = sum(rowSums(E_x[,-1]))
 
-
 ## reshape the forecasted baseline mortality as well 
-pcbs_mx<-  master_forecast_dt[master_forecast_dt$region=="Gaza Strip"&master_forecast_dt$year==2024&master_forecast_dt$sex%in%c("m", "f")&master_forecast_dt$source=="lc_pcbs_2019",]
-D_x_pcbs= spread(pcbs_mx[,c("sex", "age","mx_noc")], key=age, value=mx_noc)
+pcbs_mx<-  master_forecast_dt[master_forecast_dt$region=="Gaza Strip"&master_forecast_dt$year%in%c(2023,2024)&master_forecast_dt$sex%in%c("m", "f")&master_forecast_dt$source=="lc_pcbs_2019",]
+
+pcbs_mx_23_24 <- pcbs_mx |> 
+  group_by(sex, age) |>
+  summarise(mean_mx_noc = mean(mx_noc))
+
+D_x_pcbs= spread(pcbs_mx_23_24[,c("sex", "age","mean_mx_noc")], key=age, value=mean_mx_noc)
 
 ### 2023 only: combatants
 Dx_cmb <- readRDS("data/Dx_cmb.rds")
@@ -51,18 +64,18 @@ Dx_cmb_spread <- spread(Dx_cmb, key=age, value=Dx_cmb_mean)
 #D_x_int = round(D_x_pcbs[,-1])
 
 ## age-sex specific mortality rates (for 2023 ONLY - add combatants)
-#mu_x_pcbs <-  (D_x_pcbs[,-1] + Dx_cmb_spread[,-1])/E_x[,-1] 
-#mu_age_pcbs <- colSums(D_x_pcbs[,-1] + Dx_cmb_spread[,-1])/E_age
+mu_x_pcbs <-  (D_x_pcbs[,-1] + Dx_cmb_spread[,-1])/E_x[,-1] 
+mu_age_pcbs <- colSums(D_x_pcbs[,-1] + Dx_cmb_spread[,-1])/E_age
 
 # ## for 2024
 ##2024: 
-mu_x_pcbs <-  (D_x_pcbs[,-1])/E_x[,-1] 
-mu_age_pcbs <- colSums(D_x_pcbs[,-1])/E_age
+#mu_x_pcbs <-  (D_x_pcbs[,-1])/E_x[,-1] 
+#mu_age_pcbs <- colSums(D_x_pcbs[,-1])/E_age
 
 ### set the reported death toll (Palestine 2023: 22286, 2024: 24213)
 ### WB: 2023: 308, 2024: 494 
-## Gaza Strip: 2023: 21978,  2024: 23719
-R = 23719
+## Gaza Strip: 2023: 21978,  2024: 23719 (for 2023-end of 2024: 45541)
+R = 44541 
 ## total number of sexes 
 S = nrow(mu_x_pcbs)
 ## total number of age groups 
@@ -75,12 +88,12 @@ x <- as.numeric(colnames(mu_x_pcbs))
 ## setting up and running the Bayesian model 
 ##-------------------------------
 
-## compile the model 
+## compile the model (use truncated one for bts and un)
 compiled_model <- stan_model(paste0(model_dir, "bmmr_change_prior.stan"))
 
 model_out <- sampling(compiled_model,
                       # include = TRUE,
-                    sample_file=paste0(results_dir, 'moh_samples.csv'), #writes the samples to CSV file
+                    sample_file=paste0(results_dir, 'bts_samples.csv'), #writes the samples to CSV file
                       iter =2000,
                       warmup=1000, #BURN IN
                       chains =4,
@@ -97,7 +110,10 @@ model_out <- sampling(compiled_model,
                         pi_sd = pi_sd, 
                         R = R,
                         S = S,
-                        X= X))
+                        X= X,
+                        U = log(pi_ul[,-1]),
+                        L = log(pi_ll[,-1]), 
+                        trunc_ind =1))
 ## check for convergence
 # 
 # rstan::traceplot(model_out, pars=c("mu_age_total[1]", "pi_x[1,1]", "pi_x[1,3]", "pr"))
@@ -143,31 +159,17 @@ all_lifetable_f <- Reduce(rbind,lifetable_f)
 all_lifetable_m <- Reduce(rbind,lifetable_m)
 all_lifetable_t <- Reduce(rbind,lifetable_t)
 
-get_le0_dt <- function(lifetable, sex, year){ 
-  lifetable_age0 <- lifetable[lifetable$x==0,]
-  lifetable_age0$year <- year
-  lifetable_age0$sex <- sex
-  lifetable_age0$scenario <-  "GMoH"
-  if(sex=="Females"){
-    lifetable_age0$bmmr_lss <- 76.86086 -  lifetable_age0$ex   ## LSS for women
-  } else if(sex=="Males"){
-    lifetable_age0$bmmr_lss <- 72.08611 - lifetable_age0$ex     ## LSS for men 
-  } else{
-    lifetable_age0$bmmr_lss <- 	74.46358 - lifetable_age0$ex  ## total LSS
-  }
-  
-  return(lifetable_age0)
-}
+## scenarios:  "GMoH report", "B'Tselem historical average", "UN-IGME pattern"
+lifetable_f_age0 <- get_le0_dt(all_lifetable_f, "Females", 2024, "GMoH report", le0= le_noc_list[[2]])
+lifetable_m_age0 <- get_le0_dt(all_lifetable_m, "Males", 2024,"GMoH report",le0= le_noc_list[[2]])
+lifetable_t_age0 <- get_le0_dt(all_lifetable_t, "Total", 2024, "GMoH report", le0= le_noc_list[[2]])
 
-lifetable_f_age0 <- get_le0_dt(all_lifetable_f, "Females", 2024)
-lifetable_m_age0 <- get_le0_dt(all_lifetable_m, "Males", 2024)
-lifetable_t_age0 <- get_le0_dt(all_lifetable_t, "Total", 2024)
 ### histograms of the estimated life expectancy at 0 
 hist(lifetable_f_age0$ex)
 hist(lifetable_m_age0$ex)
 hist(lifetable_t_age0$ex)
 
 
-write.csv(lifetable_m_age0, paste0(results_dir, "le_estimates/cumulative_2024/moh_2024_m_le0.csv"), row.names = FALSE)
-write.csv(lifetable_f_age0, paste0(results_dir, "le_estimates/cumulative_2024/moh_2024_f_le0.csv"), row.names = FALSE)
-write.csv(lifetable_t_age0, paste0(results_dir, "le_estimates/cumulative_2024/moh_2024_t_le0.csv"), row.names = FALSE)
+write.csv(lifetable_m_age0, paste0(results_dir, "bts_2024_m_le0.csv"), row.names = FALSE)
+write.csv(lifetable_f_age0, paste0(results_dir, "bts_2024_f_le0.csv"), row.names = FALSE)
+write.csv(lifetable_t_age0, paste0(results_dir, "bts_2024_t_le0.csv"), row.names = FALSE)
