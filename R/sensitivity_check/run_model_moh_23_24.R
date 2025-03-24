@@ -53,10 +53,13 @@ E = sum(rowSums(E_x[,-1]))
 pcbs_mx<-  master_forecast_dt[master_forecast_dt$region=="Gaza Strip"&master_forecast_dt$year%in%c(2023,2024)&master_forecast_dt$sex%in%c("m", "f")&master_forecast_dt$source=="lc_pcbs_2019",]
 
 pcbs_mx_23_24 <- pcbs_mx |> 
+  select(year, sex, age, mx_noc) |>
+  left_join(pcbs_exp |> select(year, sex, age, pop), by = c("year", "sex", "age")) |>
+  mutate(Dx_noc = mx_noc*pop/1E5) |>
   group_by(sex, age) |>
-  summarise(mean_mx_noc = mean(mx_noc))
+  summarise(mean_Dx_noc = mean(Dx_noc))
 
-D_x_pcbs= spread(pcbs_mx_23_24[,c("sex", "age","mean_mx_noc")], key=age, value=mean_mx_noc)
+D_x_pcbs= spread(pcbs_mx_23_24[,c("sex", "age","mean_Dx_noc")], key=age, value=mean_Dx_noc)
 
 ### 2023 only: combatants
 Dx_cmb <- readRDS("data/Dx_cmb.rds")
@@ -93,7 +96,7 @@ compiled_model <- stan_model(paste0(model_dir, "bmmr_change_prior.stan"))
 
 model_out <- sampling(compiled_model,
                       # include = TRUE,
-                    sample_file=paste0(results_dir, "moh_samples.csv"), #writes the samples to CSV file
+                    sample_file=paste0(results_dir, "moh_samples_v2.csv"), #writes the samples to CSV file
                       iter =2000,
                       warmup=1000, #BURN IN
                       chains =4,
