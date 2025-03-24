@@ -15,7 +15,7 @@ results_dir <- paste0(getwd(),"/R/sensitivity_check/samples/")
 ## load the 2024 moh age distributions (as an example)
 ## un age dists: pi_x_un_2023_2024_gaza
 #bts age dists: pi_x_btselem_2023_2024_gaza
-pi_x_moh <- readRDS("data/pi_x_btselem_2023_2024_gaza.rds")
+pi_x_moh <- readRDS("data/pi_x_moh_2023_2024_gaza.rds")
 
 ## get the sex-specific age distributions 
 pi_x_moh <- pi_x_moh[pi_x_moh$sex!="t",]
@@ -75,7 +75,7 @@ mu_age_pcbs <- colSums(D_x_pcbs[,-1] + Dx_cmb_spread[,-1])/E_age
 ### set the reported death toll (Palestine 2023: 22286, 2024: 24213)
 ### WB: 2023: 308, 2024: 494 
 ## Gaza Strip: 2023: 21978,  2024: 23719 (for 2023-end of 2024: 45541)
-R = 44541 
+R = 41870 
 ## total number of sexes 
 S = nrow(mu_x_pcbs)
 ## total number of age groups 
@@ -89,11 +89,11 @@ x <- as.numeric(colnames(mu_x_pcbs))
 ##-------------------------------
 
 ## compile the model (use truncated one for bts and un)
-compiled_model <- stan_model(paste0(model_dir, "bmmr_change_prior_trunc.stan"))
+compiled_model <- stan_model(paste0(model_dir, "bmmr_change_prior.stan"))
 
 model_out <- sampling(compiled_model,
                       # include = TRUE,
-                    sample_file=paste0(results_dir, 'bts_samples.csv'), #writes the samples to CSV file
+                    sample_file=paste0(results_dir, "moh_samples.csv"), #writes the samples to CSV file
                       iter =2000,
                       warmup=1000, #BURN IN
                       chains =4,
