@@ -11,7 +11,7 @@ source("R/0_setup.R")
 ## set the working directory
 setwd("U:/Documents/repos/uncertainty_quantification")
 model_dir <- paste0(getwd(),"/R/model/")
-results_dir <- paste0(getwd(),"/R/sensitivity_check/samples/palestine_bu/")
+results_dir <- paste0(getwd(),"/R/sensitivity_check/guillot_samples/v2/")
 
 le0_noc <- readRDS("data/ex0_noc.rds")
 le0_noc_23 <- le0_noc[le0_noc$year==2023&le0_noc$source=="lc_pcbs_2019"&le0_noc$region=="Gaza Strip",]
@@ -31,7 +31,7 @@ le_noc_list <- list(
 le0_gaza_mean <- c(78.29336,  74.95395, 76.67211)
 
 ## read in samples 
-file_names <- c("moh_24_samples_1", "moh_24_samples_2", "moh_24_samples_3", "moh_24_samples_4")
+file_names <- c("moh_samples_v2_1", "moh_samples_v2_2", "moh_samples_v2_3", "moh_samples_v2_4")
 model_out <- read_stan_csv(paste0(results_dir, file_names,".csv"))
 
 ### extract the model-generated mortality distributions (incl WPP deaths)
