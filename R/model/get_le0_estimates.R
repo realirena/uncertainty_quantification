@@ -11,7 +11,7 @@ source("R/0_setup.R")
 ## set the working directory
 setwd("U:/Documents/repos/uncertainty_quantification")
 model_dir <- paste0(getwd(),"/R/model/")
-results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2019/2024/gaza_bu/")
+results_dir <- paste0(getwd(),"/R/sensitivity_check/samples/palestine_bu/")
 
 le0_noc <- readRDS("data/ex0_noc.rds")
 le0_noc_23 <- le0_noc[le0_noc$year==2023&le0_noc$source=="lc_pcbs_2019"&le0_noc$region=="Gaza Strip",]
@@ -31,8 +31,8 @@ le_noc_list <- list(
 le0_gaza_mean <- c(78.29336,  74.95395, 76.67211)
 
 ## read in samples 
-#file_names <- c("un_dist_conflict_1", "un_dist_conflict_2", "un_dist_conflict_3", "un_dist_conflict_4")
-#model_out <- read_stan_csv(paste0(results_dir, file_names,".csv"))
+file_names <- c("moh_24_samples_1", "moh_24_samples_2", "moh_24_samples_3", "moh_24_samples_4")
+model_out <- read_stan_csv(paste0(results_dir, file_names,".csv"))
 
 ### extract the model-generated mortality distributions (incl WPP deaths)
 mu_x_total = rstan::extract(model_out, pars=c("mu_x_total"))$mu_x_total
@@ -48,7 +48,7 @@ lifetable_t <- list()
 
 num_iter <- dim(mu_x_total)[1] ## grab the number of MCMC iterations 
 ## alternative: if we don't want to use all of the samples, we can just use a random sample of iterations 
-set.seed(233)
+set.seed(243)
 ran_iter <- sample(c(1:num_iter), 1000, replace=FALSE)
 
 ## this should now be an array with dimension ran_iter x 2 x 17 
@@ -69,9 +69,9 @@ all_lifetable_m <- Reduce(rbind,lifetable_m)
 all_lifetable_t <- Reduce(rbind,lifetable_t)
 
 ## scenarios:  "GMoH report", "B'Tselem historical average", "UN-IGME pattern"
-lifetable_f_age0 <- get_le0_dt(all_lifetable_f, "Females", 2024,  "GMoH report", le0= le0_gaza_mean)
-lifetable_m_age0 <- get_le0_dt(all_lifetable_m, "Males", 2024,  "GMoH report",le0= le0_gaza_mean)
-lifetable_t_age0 <- get_le0_dt(all_lifetable_t, "Total", 2024, "GMoH report",le0= le0_gaza_mean)
+lifetable_f_age0 <- get_le0_dt(all_lifetable_f, "Females", 2024,  "GMoH report", le0= le_noc_list[[4]])
+lifetable_m_age0 <- get_le0_dt(all_lifetable_m, "Males", 2024,  "GMoH report",le0= le_noc_list[[4]])
+lifetable_t_age0 <- get_le0_dt(all_lifetable_t, "Total", 2024, "GMoH report",le0= le_noc_list[[4]])
 
 ## histograms of the estimated life expectancies after accounting for reporting rate error 
 hist(lifetable_f_age0$ex)

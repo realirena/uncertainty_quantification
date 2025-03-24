@@ -19,7 +19,7 @@ mean(pr_prior$x)
 ggplot(data=pr_prior, aes(x=x)) + 
   geom_density(fill="#378582", alpha=0.5) +
   geom_vline(xintercept=mean(pr_prior$x), size=1.25, linetype="dashed",color="black") + 
-  labs(title = "Reporting Rate Prior", subtitle="Mean: 0.59 (41% underreporting)",
+  labs(title = "Reporting Rate Beta Prior", subtitle="Mean: 1.0 (lower and upper bounds: 0.8 - 1.2)",
        x="Probability") + 
   theme(plot.title=element_text(size=20, hjust=0.5),
         plot.subtitle = element_text(size=18, hjust=0.5),
