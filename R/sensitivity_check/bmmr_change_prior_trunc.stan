@@ -21,7 +21,6 @@ data {
   vector[X] mu_age_noc; // age specific baseline mortality
   matrix [S,X] U; 
   matrix[S,X] L; 
-  int<lower=0, upper=1> trunc_ind; 
 }
 
 transformed data {
@@ -87,11 +86,7 @@ model {
  
   for(s in 1:S){
       for(x in 1:X){
-        if(trunc_ind==1){
            theta_x[s,x] ~ normal(pi_x_hat[s,x], pi_sd[s,x]) T[L[s,x], U[s,x]];
-        } else {
-           theta_x[s,x] ~ normal(pi_x_hat[s,x], pi_sd[s,x]); 
-        }
        // priors on the age distributions - the model works without this, but this could also help w/ identifiability (see Schmertmann 2018)
        //  D_baseline[s,x] ~ poisson(E_x[s,x]*mu_x_noc[s,x]); 
       }
