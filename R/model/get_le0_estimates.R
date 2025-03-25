@@ -12,28 +12,29 @@ source("R/0_setup.R")
 setwd("U:/Documents/repos/uncertainty_quantification")
 model_dir <- paste0(getwd(),"/R/model/")
 
-results_dir <- paste0(getwd(),"/R/sensitivity_check/guillot_samples/v2/")
+# results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2019/2024/palestine_bu/")
+results_dir <- paste0(getwd(),"/R/sensitivity_check/samples/gaza_bu/")
 
-le0_noc <- readRDS("data/ex0_noc.rds")
-le0_noc_23 <- le0_noc[le0_noc$year==2023&le0_noc$source=="lc_pcbs_2019"&le0_noc$region=="Gaza Strip",]
+# le0_noc <- readRDS("data/ex0_noc.rds")
+# le0_noc_23 <- le0_noc[le0_noc$year==2023&le0_noc$source=="lc_pcbs_2019"&le0_noc$region=="Palestine",]
 ## read in age distributions
 pi_x <- readRDS("data/pi_x_moh_2024.rds")
 pi_x <- pi_x[pi_x$sex!="t",]
 pi_spread <- spread(pi_x[,c("sex", "age", "pi_x_mean")], key=age, value=pi_x_mean)
 x <- as.numeric(colnames(pi_spread)[2:19])
-### estimated LE's (noc) by region and sex
-le_noc_list <- list( 
+# ### estimated LE's (noc) by region and sex
+le_noc_list <- list(
   c(78.2272,74.95395, 76.67211), ## gaza 2023
-  c(78.29336,	75.06242 ,76.77138), ## gaza 2024 , 
+  c(78.29336,	75.06242 ,76.77138), ## gaza 2024 ,
   c(79.68532, 76.32110, 77.98499), ## palestine 2023,
-  c(79.78170, 76.44891, 78.09980) ## palestine 2024 
+  c(79.78170, 76.44891, 78.09980) ## palestine 2024
 )
-
-le0_gaza_mean <- c(78.29336,  74.95395, 76.67211)
+# 
+# le0_gaza_mean <- c(78.29336,  74.95395, 76.67211)
 
 ## read in samples 
 
-file_names <- c("un_geno_samples_1", "un_geno_samples_2", "un_geno_samples_3", "un_geno_samples_4")
+file_names <- c("moh24_samples_1", "moh24_samples_2", "moh24_samples_3", "moh24_samples_4")
 model_out <- read_stan_csv(paste0(results_dir, file_names,".csv"))
 
 ### extract the model-generated mortality distributions (incl WPP deaths)
@@ -71,9 +72,9 @@ all_lifetable_m <- Reduce(rbind,lifetable_m)
 all_lifetable_t <- Reduce(rbind,lifetable_t)
 
 ## scenarios:  "GMoH report", "B'Tselem historical average", "UN-IGME pattern"
-lifetable_f_age0 <- get_le0_dt(all_lifetable_f, "Females", 2024, "UN-IGME pattern",  le0= le_noc_list[[2]])
-lifetable_m_age0 <- get_le0_dt(all_lifetable_m, "Males", 2024,"UN-IGME pattern",le0= le_noc_list[[2]])
-lifetable_t_age0 <- get_le0_dt(all_lifetable_t, "Total", 2024, "UN-IGME pattern",le0= le_noc_list[[2]])
+lifetable_f_age0 <- get_le0_dt(all_lifetable_f, "Females", 2024, "GMoH report",  le0= le_noc_list[[2]])
+lifetable_m_age0 <- get_le0_dt(all_lifetable_m, "Males", 2024,"GMoH report",le0= le_noc_list[[2]])
+lifetable_t_age0 <- get_le0_dt(all_lifetable_t, "Total", 2024, "GMoH report",le0= le_noc_list[[2]])
 
 ## histograms of the estimated life expectancies after accounting for reporting rate error 
 hist(lifetable_f_age0$ex)
@@ -111,7 +112,7 @@ g3 <- ggplot(data=lifetable_t_age0, aes(x=ex)) +
 
 gridExtra::grid.arrange(g1, g2, g3, ncol=3)
 
-write.csv(lifetable_m_age0, paste0(results_dir, "un_geno24_lifetable_m_le0.csv"), row.names = FALSE)
-write.csv(lifetable_f_age0, paste0(results_dir, "un_geno24_lifetable_f_le0.csv"), row.names = FALSE)
-write.csv(lifetable_t_age0, paste0(results_dir, "un_geno24_lifetable_t_le0.csv"), row.names = FALSE)
+write.csv(lifetable_m_age0, paste0(results_dir, "moh24_lifetable_m_le0.csv"), row.names = FALSE)
+write.csv(lifetable_f_age0, paste0(results_dir, "moh24_lifetable_f_le0.csv"), row.names = FALSE)
+write.csv(lifetable_t_age0, paste0(results_dir, "moh24_lifetable_t_le0.csv"), row.names = FALSE)
 

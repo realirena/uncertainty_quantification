@@ -39,17 +39,17 @@ results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2019/2023/")
 vars <- c("ex", "bmmr_lss","year", "sex", "scenario")
 
 ## Palestine results 
-nat_le_m_age0 <- read.csv(paste0(results_dir, "palestine/moh_lifetable_m_le0.csv"))
-nat_le_f_age0 <- read.csv(paste0(results_dir, "palestine/moh_lifetable_f_le0.csv"))
-nat_le_t_age0 <- read.csv(paste0(results_dir, "palestine/moh_lifetable_t_le0.csv"))
+nat_le_m_age0 <- read.csv(paste0(results_dir, "palestine_bu/moh_lifetable_m_le0.csv"))
+nat_le_f_age0 <- read.csv(paste0(results_dir, "palestine_bu/moh_lifetable_f_le0.csv"))
+nat_le_t_age0 <- read.csv(paste0(results_dir, "palestine_bu/moh_lifetable_t_le0.csv"))
 
 nat_all <- rbind(nat_le_f_age0[,vars], nat_le_m_age0[,vars], nat_le_t_age0[,vars])
 nat_all$region="Palestine"
 
 ## Gaza results
-gaza_le_m_age0 <- read.csv(paste0(results_dir, "gaza/moh_lifetable_m_le0.csv"))
-gaza_le_f_age0 <- read.csv(paste0(results_dir, "gaza/moh_lifetable_f_le0.csv"))
-gaza_le_t_age0 <- read.csv(paste0(results_dir, "gaza/moh_lifetable_t_le0.csv"))
+gaza_le_m_age0 <- read.csv(paste0(results_dir, "gaza_bu/moh_lifetable_m_le0.csv"))
+gaza_le_f_age0 <- read.csv(paste0(results_dir, "gaza_bu/moh_lifetable_f_le0.csv"))
+gaza_le_t_age0 <- read.csv(paste0(results_dir, "gaza_bu/moh_lifetable_t_le0.csv"))
 
 gaza_all <- rbind(gaza_le_f_age0[,vars], gaza_le_m_age0[,vars], gaza_le_t_age0[,vars])
 gaza_all$region="Gaza Strip"
@@ -157,17 +157,17 @@ results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2019/2024/")
 
 ## palestine 
 
-nat_le_m_24 <- read.csv(paste0(results_dir, "palestine/moh_lifetable_m_le0.csv"))
-nat_le_f_24 <- read.csv(paste0(results_dir, "palestine/moh_lifetable_f_le0.csv"))
-nat_le_t_24 <- read.csv(paste0(results_dir, "palestine/moh_lifetable_t_le0.csv"))
+nat_le_m_24 <- read.csv(paste0(results_dir, "palestine_bu/moh_lifetable_m_le0.csv"))
+nat_le_f_24 <- read.csv(paste0(results_dir, "palestine_bu/moh_lifetable_f_le0.csv"))
+nat_le_t_24 <- read.csv(paste0(results_dir, "palestine_bu/moh_lifetable_t_le0.csv"))
 
 nat_24_all  <- rbind(nat_le_m_24[,vars], nat_le_f_24[,vars],nat_le_t_24[,vars])
 nat_24_all$region="Palestine"
 
 ## gaza 
-gaza_le_m_24 <- read.csv(paste0(results_dir, "gaza/moh_lifetable_m_le0.csv"))
-gaza_le_f_24 <- read.csv(paste0(results_dir, "gaza/moh_lifetable_f_le0.csv"))
-gaza_le_t_24 <- read.csv(paste0(results_dir, "gaza/moh_lifetable_t_le0.csv"))
+gaza_le_m_24 <- read.csv(paste0(results_dir, "gaza_bu/moh_lifetable_m_le0.csv"))
+gaza_le_f_24 <- read.csv(paste0(results_dir, "gaza_bu/moh_lifetable_f_le0.csv"))
+gaza_le_t_24 <- read.csv(paste0(results_dir, "gaza_bu/moh_lifetable_t_le0.csv"))
 
 gaza_24_all <- rbind(gaza_le_f_24[,vars], gaza_le_m_24[,vars], gaza_le_t_24[,vars])
 gaza_24_all$region="Gaza Strip"
@@ -287,26 +287,28 @@ annotation_custom2 <- function (grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax
 embedded_grob <- ggplotGrob(focus_male)
 embedded_grob_f <- ggplotGrob(focus_female)
 
-rect_data_m <- data.frame(xmin = c(2022), xmax = c(2025), ymin = c(28), ymax = c(58), sex = "Males")
-rect_data_f <- data.frame(xmin = c(2022), xmax = c(2025), ymin = c(38), ymax = c(63), sex = "Females")
+rect_data_m <- data.frame(xmin = c(2022), xmax = c(2025), ymin = c(32), ymax = c(60), sex = "Males")
+rect_data_f <- data.frame(xmin = c(2022), xmax = c(2025), ymin = c(42), ymax = c(67), sex = "Females")
 
 # Combine the plots
 le0_23_24_2 <- le0_23_24 +
   # annotation_custom(grob = embedded_grob, xmin = 2012, xmax = 2020, ymin = 25, ymax = 60)
   annotation_custom2(grob=embedded_grob, 
                      data = data.frame(sex="Males"),
-                     xmin = 2013, xmax = 2018, ymin = 28, ymax = 65) +
+                     xmin = 2013, xmax = 2018, ymin = 30, ymax = 65) +
   annotation_custom2(grob=embedded_grob_f, 
                      data = data.frame(sex="Females"),
-                     xmin = 2013, xmax = 2018, ymin = 28, ymax = 65) +
+                     xmin = 2013, xmax = 2018, ymin = 30, ymax = 65) +
   geom_rect(data = rect_data_m, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
             fill = NA, color = "black", linewidth = 0.5, linetype = 2)  +
   geom_rect(data = rect_data_f, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
             fill = NA, color = "black", linewidth = 0.5, linetype = 2)  +
-  geom_segment(data = rect_data_m, aes(x = 2022, xend = 2017.8, y = 28, yend = 31), size = 0.5) +
-  geom_segment(data = rect_data_m, aes(x = 2022, xend = 2017.8, y = 58, yend = 64), size = 0.5) +
-  geom_segment(data = rect_data_f, aes(x = 2022, xend = 2017.8, y = 38, yend = 31), size = 0.5) +
-  geom_segment(data = rect_data_f, aes(x = 2022, xend = 2017.8, y = 63, yend = 64), size = 0.5)
+  geom_segment(data = rect_data_m, aes(x = 2022, xend = 2017.8, y = 32, yend = 31), size = 0.5) +
+  geom_segment(data = rect_data_m, aes(x = 2022, xend = 2017.8, y = 43, yend = 64), size = 0.5) +
+  geom_segment(data = rect_data_f, aes(x = 2022, xend = 2017.8, y = 42, yend = 31), size = 0.5) +
+  geom_segment(data = rect_data_f, aes(x = 2022, xend = 2017.8, y = 67, yend = 64), size = 0.5) +
+  guides(fill = guide_legend(override.aes = list(linetype = 0, pch = NA)),
+         linetype = guide_legend(order = 1),  shape = "none")
 
 le0_23_24_2
 
