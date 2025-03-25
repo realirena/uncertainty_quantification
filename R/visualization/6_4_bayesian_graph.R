@@ -41,20 +41,20 @@ panels <- tibble(sex = rep(c("Females", "Males", "Total"), 2),
 
 
 ### add new graphing code to plot the uncertainty estimates: 
-results_dir <- paste0(getwd(),"/R/sensitivity_check/samples/gaza_bu/")
+results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2019/2023/gaza_bu")
 vars <- c("ex", "bmmr_lss","year", "sex", "scenario")
 
 ## oct 26th results (updated with age distribution uncertainty)
-oct26_le_m_age0 <- read.csv(paste0(results_dir, "moh_2023_lifetable_m_le0.csv"))
-oct26_le_f_age0 <- read.csv(paste0(results_dir, "moh_2023_lifetable_f_le0.csv"))
-oct26_le_t_age0 <- read.csv(paste0(results_dir, "moh_2023_lifetable_t_le0.csv"))
+oct26_le_m_age0 <- read.csv(paste0(results_dir, "moh_lifetable_m_le0.csv"))
+oct26_le_f_age0 <- read.csv(paste0(results_dir, "moh_lifetable_f_le0.csv"))
+oct26_le_t_age0 <- read.csv(paste0(results_dir, "moh_lifetable_t_le0.csv"))
 
 oct_26_all <- rbind(oct26_le_f_age0[,vars], oct26_le_m_age0[,vars], oct26_le_t_age0[,vars])
 
 ## B'tselem results
-bts_le_m_age0 <- read.csv(paste0(results_dir, "bts_2023_lifetable_m_le0.csv"))
-bts_le_f_age0 <- read.csv(paste0(results_dir, "bts_2023_lifetable_f_le0.csv"))
-bts_le_t_age0 <- read.csv(paste0(results_dir, "bts_2023_lifetable_t_le0.csv"))
+bts_le_m_age0 <- read.csv(paste0(results_dir, "bts_lifetable_m_le0.csv"))
+bts_le_f_age0 <- read.csv(paste0(results_dir, "bts_lifetable_f_le0.csv"))
+bts_le_t_age0 <- read.csv(paste0(results_dir, "bts_lifetable_t_le0.csv"))
 
 bts_all <- rbind(bts_le_f_age0[,vars], bts_le_m_age0[,vars], bts_le_t_age0[,vars])
 
@@ -147,16 +147,16 @@ ggarrange(le0_plot, lss_plot, nrow = 2, common.legend = TRUE, legend = "bottom")
 ### add new graphing code to plot the 2024 uncertainty estimates: 
 results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2019/2024/gaza/")
 ## MoH 2024 (oct 23 - oct 24) results
-moh_le_m_24 <- read.csv(paste0(results_dir, "moh_2024_lifetable_m_le0.csv"))
-moh_le_f_24 <- read.csv(paste0(results_dir, "moh_2024_lifetable_f_le0.csv"))
-moh_le_t_24 <- read.csv(paste0(results_dir, "moh_2024_lifetable_t_le0.csv"))
+moh_le_m_24 <- read.csv(paste0(results_dir, "moh_lifetable_m_le0.csv"))
+moh_le_f_24 <- read.csv(paste0(results_dir, "moh_lifetable_f_le0.csv"))
+moh_le_t_24 <- read.csv(paste0(results_dir, "moh_lifetable_t_le0.csv"))
 
 moh_24_all  <- rbind(moh_le_m_24[,vars], moh_le_f_24[,vars],moh_le_t_24[,vars])
 
 
-bts_le_m_24 <- read.csv(paste0(results_dir, "bts_2024_lifetable_m_le0.csv"))
-bts_le_f_24 <- read.csv(paste0(results_dir, "bts_2024_lifetable_f_le0.csv"))
-bts_le_t_24 <- read.csv(paste0(results_dir, "bts_2024_lifetable_t_le0.csv"))
+bts_le_m_24 <- read.csv(paste0(results_dir, "bts_lifetable_m_le0.csv"))
+bts_le_f_24 <- read.csv(paste0(results_dir, "bts_lifetable_f_le0.csv"))
+bts_le_t_24 <- read.csv(paste0(results_dir, "bts_lifetable_t_le0.csv"))
 
 bts24_all <- rbind(bts_le_f_24[,vars], bts_le_m_24[,vars], bts_le_t_24[,vars])
 
