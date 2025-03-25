@@ -33,7 +33,7 @@ le0_gaza_mean <- c(78.29336,  74.95395, 76.67211)
 
 ## read in samples 
 
-file_names <- c("moh_samples_1", "moh_samples_2", "moh_samples_3", "moh_samples_4")
+file_names <- c("un_geno_samples_1", "un_geno_samples_2", "un_geno_samples_3", "un_geno_samples_4")
 model_out <- read_stan_csv(paste0(results_dir, file_names,".csv"))
 
 ### extract the model-generated mortality distributions (incl WPP deaths)
@@ -71,9 +71,9 @@ all_lifetable_m <- Reduce(rbind,lifetable_m)
 all_lifetable_t <- Reduce(rbind,lifetable_t)
 
 ## scenarios:  "GMoH report", "B'Tselem historical average", "UN-IGME pattern"
-lifetable_f_age0 <- get_le0_dt(all_lifetable_f, "Females", 2023, "GMoH report",, le0= le_noc_list[[1]])
-lifetable_m_age0 <- get_le0_dt(all_lifetable_m, "Males", 2023,  "GMoH report",,le0= le_noc_list[[1]])
-lifetable_t_age0 <- get_le0_dt(all_lifetable_t, "Total", 2023,  "GMoH report",,le0= le_noc_list[[1]])
+lifetable_f_age0 <- get_le0_dt(all_lifetable_f, "Females", 2024, "UN-IGME pattern",  le0= le_noc_list[[2]])
+lifetable_m_age0 <- get_le0_dt(all_lifetable_m, "Males", 2024,"UN-IGME pattern",le0= le_noc_list[[2]])
+lifetable_t_age0 <- get_le0_dt(all_lifetable_t, "Total", 2024, "UN-IGME pattern",le0= le_noc_list[[2]])
 
 ## histograms of the estimated life expectancies after accounting for reporting rate error 
 hist(lifetable_f_age0$ex)
