@@ -5,7 +5,7 @@ library(bayesplot)
 library(reshape2)
 library(ggpubr)
 ## set the working directory
-setwd("U:/Documents/repos/Life_expectancy_Palestine")
+setwd("U:/Documents/repos/uncertainty_quantification")
 
 dt <- 
   readRDS("data/ex0_noc.rds") %>% 
@@ -41,7 +41,7 @@ panels <- tibble(sex = rep(c("Females", "Males", "Total"), 2),
 
 
 ### add new graphing code to plot the uncertainty estimates: 
-results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2019/2023/gaza_bu")
+results_dir <- paste0(getwd(),"/R/sensitivity_check/samples_23_24/")
 vars <- c("ex", "bmmr_lss","year", "sex", "scenario")
 
 ## oct 26th results (updated with age distribution uncertainty)
@@ -62,9 +62,9 @@ bts_all <- rbind(bts_le_f_age0[,vars], bts_le_m_age0[,vars], bts_le_t_age0[,vars
 # UN genocide pattern -----------------------------------------------------
 
 ###UN dist results 
-un_le_m_geno23 <- read.csv(paste0(results_dir, "un_geno23_lifetable_m_le0.csv"))
-un_le_f_geno23 <- read.csv(paste0(results_dir, "un_geno23_lifetable_f_le0.csv"))
-un_le_t_geno23 <- read.csv(paste0(results_dir, "un_geno23_lifetable_t_le0.csv"))
+un_le_m_geno23 <- read.csv(paste0(results_dir, "un_geno_lifetable_m_le0.csv"))
+un_le_f_geno23 <- read.csv(paste0(results_dir, "un_geno_lifetable_f_le0.csv"))
+un_le_t_geno23 <- read.csv(paste0(results_dir, "un_geno_lifetable_t_le0.csv"))
 
 un_genocide23_all <- rbind(un_le_f_geno23[,vars], un_le_m_geno23[,vars], un_le_t_geno23[,vars])
 
@@ -139,9 +139,8 @@ lss_plot <-  ggplot() +
 
 # le0_lss <- gridExtra::grid.arrange(le0_plot, lss_plot)
 
-ggarrange(le0_plot, lss_plot, nrow = 2, common.legend = TRUE, legend = "bottom")
-# 
-#ggsave("figures/un_conflict_pix/gaza_le0_lss_23_unconflict.png", plot=le0_lss, w = 16, h = 8)
+le0_lss <- ggarrange(le0_plot, lss_plot, nrow = 2, common.legend = TRUE, legend = "bottom")
+ggsave("figures/le0_lss_gaza_sources_23_24.png", plot=le0_lss, w = 16, h = 8)
 
 
 ### add new graphing code to plot the 2024 uncertainty estimates: 
@@ -183,7 +182,7 @@ lss_23_24  <-  lss_plot +  stat_histinterval(data=le_lss_geno_all24, aes(x = yea
 
 le0_lss_23_24 <- ggarrange(le0_23_24, lss_23_24, nrow = 2, common.legend = TRUE, legend = "bottom")
 
-ggsave(le0_lss_23_24, file = "figures/LE_sources_gaza_genocide.pdf", width = 16, height = 8)
+ggsave(le0_lss_23_24, file = "figures/LE_sources_gaza_genocide_v2.pdf", width = 16, height = 8)
 
 # ggsave("figures/un_conflict_pix/le0_lss_gaza_23_24.png", plot=le0_lss_23_24,
 #        w = 16, h = 8)

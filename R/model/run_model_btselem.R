@@ -54,8 +54,8 @@ pcbs_mx_mean <- pcbs_mx |>
 D_x_pcbs= spread(pcbs_mx_mean[,c("sex", "age","mean_Dx_noc")], key=age, value=mean_Dx_noc)
 
 ### 2023 only: combatants
-Dx_cmb <- readRDS("data/Dx_cmb.rds")
-Dx_cmb_spread <- spread(Dx_cmb, key=age, value=Dx_cmb_mean)
+#Dx_cmb <- readRDS("data/Dx_cmb.rds")
+#Dx_cmb_spread <- spread(Dx_cmb, key=age, value=Dx_cmb_mean)
 #D_x_int = round(D_x_pcbs[,-1])
 
 ## age-sex specific mortality rates (for 2023 ONLY - add combatants)
