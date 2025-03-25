@@ -41,7 +41,7 @@ panels <- tibble(sex = rep(c("Females", "Males", "Total"), 2),
 
 
 ### add new graphing code to plot the uncertainty estimates: 
-results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2019/2023/gaza/")
+results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2019/2023/gaza_bu")
 vars <- c("ex", "bmmr_lss","year", "sex", "scenario")
 
 ## oct 26th results (updated with age distribution uncertainty)
@@ -165,9 +165,6 @@ un_le_f_genocide24  <- read.csv(paste0(results_dir, "un_geno24_lifetable_f_le0.c
 un_le_t_genocide24  <- read.csv(paste0(results_dir, "un_geno24_lifetable_t_le0.csv"))
 
 un_genocide24_all <- rbind(un_le_f_genocide24[,vars], un_le_m_genocide24[,vars],un_le_t_genocide24[,vars])
-
-un_genocide_all <- rbind(un_genocide23_all, un_genocide24_all)
-un_genocide_all$type <- "Genocide"
 
 le_lss_geno_all24 <- rbind(moh_24_all, bts24_all, un_genocide24_all)
 
