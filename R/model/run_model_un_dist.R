@@ -27,9 +27,9 @@ pi_x_un_geno <- pi_x_un[pi_x_un$scenario=="genocide",]
 pi_x_un_earth <- pi_x_un[pi_x_un$scenario=="earthquake",]
 
 
-pi_x= spread(pi_x_un_earth[,c("sex", "age", "pi_x_mean")], key=age, value=pi_x_mean)
-pi_sds= spread(pi_x_un_earth[,c("sex", "age", "pi_x_sd")], key=age, value=pi_x_sd)
-pi_ul = spread(pi_x_un_earth[,c("sex", "age", "pi_x_ul")], key=age, value=pi_x_ul)
+pi_x= spread(pi_x_un_geno[,c("sex", "age", "pi_x_mean")], key=age, value=pi_x_mean)
+pi_sds= spread(pi_x_un_geno[,c("sex", "age", "pi_x_sd")], key=age, value=pi_x_sd)
+pi_ul = spread(pi_x_un_geno[,c("sex", "age", "pi_x_ul")], key=age, value=pi_x_ul)
 pi_ll = spread(pi_x_un_earth[,c("sex", "age", "pi_x_ll")], key=age, value=pi_x_ll)
 ## parameters for the age distribution priors 
 ## Delta method for E(log(theta))

@@ -5,7 +5,7 @@ library(bayesplot)
 library(reshape2)
 library(ggpubr)
 ## set the working directory
-setwd("U:/Documents/repos/Life_expectancy_Palestine")
+setwd("U:/Documents/repos/uncertainty_quantification")
 
 dt <- 
   readRDS("data/ex0_noc.rds") %>% 
@@ -41,7 +41,7 @@ panels <- tibble(sex = rep(c("Females", "Males", "Total"), 2),
 
 
 ### add new graphing code to plot the uncertainty estimates: 
-results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2019/2023/gaza_bu")
+results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2019/2023/gaza_bu/")
 vars <- c("ex", "bmmr_lss","year", "sex", "scenario")
 
 ## oct 26th results (updated with age distribution uncertainty)
@@ -183,7 +183,7 @@ lss_23_24  <-  lss_plot +  stat_histinterval(data=le_lss_geno_all24, aes(x = yea
 
 le0_lss_23_24 <- ggarrange(le0_23_24, lss_23_24, nrow = 2, common.legend = TRUE, legend = "bottom")
 
-ggsave(le0_lss_23_24, file = "figures/LE_sources_gaza_genocide.pdf", width = 16, height = 8)
+ggsave(le0_lss_23_24, file = "figures/LE_sources_gaza_genocide_v2.pdf", width = 16, height = 8)
 
 # ggsave("figures/un_conflict_pix/le0_lss_gaza_23_24.png", plot=le0_lss_23_24,
 #        w = 16, h = 8)
