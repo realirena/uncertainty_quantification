@@ -12,21 +12,22 @@ source("R/0_setup.R")
 setwd("U:/Documents/repos/uncertainty_quantification")
 model_dir <- paste0(getwd(),"/R/model/")
 
-results_dir <- paste0(getwd(),"/R/sensitivity_check/guillot_samples/v2/")
+# results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2019/2024/palestine_bu/")
+results_dir <- paste0(getwd(),"/R/sensitivity_check/samples/gaza_bu/")
 
-le0_noc <- readRDS("data/ex0_noc.rds")
-le0_noc_23 <- le0_noc[le0_noc$year==2023&le0_noc$source=="lc_pcbs_2019"&le0_noc$region=="Gaza Strip",]
+# le0_noc <- readRDS("data/ex0_noc.rds")
+# le0_noc_23 <- le0_noc[le0_noc$year==2023&le0_noc$source=="lc_pcbs_2019"&le0_noc$region=="Palestine",]
 ## read in age distributions
 pi_x <- readRDS("data/pi_x_moh_2024.rds")
 pi_x <- pi_x[pi_x$sex!="t",]
 pi_spread <- spread(pi_x[,c("sex", "age", "pi_x_mean")], key=age, value=pi_x_mean)
 x <- as.numeric(colnames(pi_spread)[2:19])
-### estimated LE's (noc) by region and sex
-le_noc_list <- list( 
+# ### estimated LE's (noc) by region and sex
+le_noc_list <- list(
   c(78.2272,74.95395, 76.67211), ## gaza 2023
-  c(78.29336,	75.06242 ,76.77138), ## gaza 2024 , 
+  c(78.29336,	75.06242 ,76.77138), ## gaza 2024 ,
   c(79.68532, 76.32110, 77.98499), ## palestine 2023,
-  c(79.78170, 76.44891, 78.09980) ## palestine 2024 
+  c(79.78170, 76.44891, 78.09980) ## palestine 2024
 )
 
 le_gaza_mean <- c(78.29336,  74.95395, 76.67211)
