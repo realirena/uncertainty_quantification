@@ -140,7 +140,7 @@ lss_plot <-  ggplot() +
 # le0_lss <- gridExtra::grid.arrange(le0_plot, lss_plot)
 
 le0_lss <- ggarrange(le0_plot, lss_plot, nrow = 2, common.legend = TRUE, legend = "bottom")
-ggsave("figures/le0_lss_gaza_sources_23_24.png", plot=le0_lss, w = 16, h = 8)
+#ggsave("figures/le0_lss_gaza_sources_23_24.png", plot=le0_lss, w = 16, h = 8)
 
 
 ### add new graphing code to plot the 2024 uncertainty estimates: 
