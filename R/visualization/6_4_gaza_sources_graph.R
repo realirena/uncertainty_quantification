@@ -4,7 +4,7 @@ library(ggdist)
 library(bayesplot)
 library(reshape2)
 ## set the working directory
-setwd("U:/Documents/repos/Life_expectancy_Palestine")
+setwd("U:/Documents/repos/uncertainty_quantification/")
 
 dt <- 
   readRDS("data/ex0_noc.rds") %>% 
@@ -145,4 +145,6 @@ le0_23_24  <- le0_plot +  stat_histinterval(data=le_lss_all24, aes(x = year, y=e
 
 
 # ggsave(le0_23_24, file = "figures/LE_sources_zoom.pdf", width = 8.75, height = 5.25)
+
+
 
