@@ -12,20 +12,20 @@ options(mc.cores = parallel::detectCores(logical= FALSE))
 ### play around with some prior distributions for the reporting rate: 
 set.seed(1234)
 pr_prior = data.frame(rbeta(10000, 2, 2)*0.14 + 0.52)
-pr_prior = data.frame(rbeta(20000, 3,3)*0.4 + 0.8)
+pr_prior = data.frame(rbeta(20000, 3,3)*0.48 + 0.76)
 names(pr_prior) <- "x"
 mean(pr_prior$x)
 
 ggplot(data=pr_prior, aes(x=x)) + 
   geom_density(fill="#378582", alpha=0.5) +
   geom_vline(xintercept=mean(pr_prior$x), size=1.25, linetype="dashed",color="black") + 
-  labs(title = "Reporting Rate Beta Prior", subtitle="Mean: 1.0 (lower and upper bounds: 0.8 - 1.2)",
+  labs(title = "Reporting Rate Beta Prior", subtitle="Mean: 1.0 (lower and upper bounds: 0.76 - 1.24)",
        x="Probability") + 
-  theme(plot.title=element_text(size=20, hjust=0.5),
-        plot.subtitle = element_text(size=18, hjust=0.5),
-        axis.text.x = element_text(size=12,angle =45, vjust = 1, hjust = 1),
-        axis.title=element_text(size=12),
-        axis.text.y = element_text(size=12))
+  theme(plot.title=element_text(size=35, hjust=0.5),
+        plot.subtitle = element_text(size=30, hjust=0.5),
+        axis.text.x = element_text(size=20,angle =45, vjust = 1, hjust = 1),
+        axis.title=element_text(size=20),
+        axis.text.y = element_text(size=20))
 
 y = pr_prior*0.4 + 0.68 ## shifting so there can be no more than 60% underreporting at most and 20% overreporting at most  
 hist(y)
