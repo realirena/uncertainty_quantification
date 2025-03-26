@@ -11,16 +11,20 @@ setwd("U:/Documents/repos/uncertainty_quantification/")
 source("R/0_setup.R")
 ## set the working directory
 model_dir <- paste0(getwd(),"/R/model/")
-results_dir <- paste0(getwd(),"/R/sensitivity_check/samples_23_24/")
+results_dir <- paste0(getwd(),"/R/sensitivity_check/samples_23_24/palestine/")
 ## load the 2024 moh age distributions (as an example)
 ## un age dists: pi_x_un_2023_2024_gaza
 #bts age dists: pi_x_btselem_2023_2024_gaza
+<<<<<<< Updated upstream
 pi_x_moh <- readRDS("data/pi_x_btselem_2023_2024_gaza.rds")
+=======
+pi_x_moh <- readRDS("data/pi_x_moh_2023_2024.rds")
+>>>>>>> Stashed changes
 
 ## get the sex-specific age distributions 
 pi_x_moh <- pi_x_moh[pi_x_moh$sex!="t",]
 ## un only: 
-#pi_x_moh <- pi_x_moh[pi_x_moh$scenario=="genocide",]
+# pi_x_moh <- pi_x_moh[pi_x_moh$scenario=="earthquake",]
 ## reshape the age distributions for the shape that we need for the model 
 pi_x= spread(pi_x_moh[,c("sex", "age", "pi_x_mean")], key=age, value=pi_x_mean)
 pi_sds= spread(pi_x_moh[,c("sex", "age", "pi_x_sd")], key=age, value=pi_x_sd)
@@ -36,7 +40,7 @@ pi_sd = pi_sds[,-1]/pi_x[,-1]
 ##-------------------------------
 ## read in exposure data:
 master_forecast_dt <- readRDS("R/lc/data_plus_forecasts_v2.rds")
-pcbs_exp  <- master_forecast_dt[master_forecast_dt$region=="Gaza Strip"&master_forecast_dt$year%in%c(2023,2024)&master_forecast_dt$sex%in%c("m", "f")&master_forecast_dt$source=="pcbs",]
+pcbs_exp  <- master_forecast_dt[master_forecast_dt$region=="Palestine"&master_forecast_dt$year%in%c(2023,2024)&master_forecast_dt$sex%in%c("m", "f")&master_forecast_dt$source=="pcbs",]
 ## number of exposures by age
 
 pcbs_ex_23_24 <- pcbs_exp |> 
@@ -50,7 +54,7 @@ E_age =colSums(E_x[,-1])
 E = sum(rowSums(E_x[,-1]))
 
 ## reshape the forecasted baseline mortality as well 
-pcbs_mx<-  master_forecast_dt[master_forecast_dt$region=="Gaza Strip"&master_forecast_dt$year%in%c(2023,2024)&master_forecast_dt$sex%in%c("m", "f")&master_forecast_dt$source=="lc_pcbs_2019",]
+pcbs_mx<-  master_forecast_dt[master_forecast_dt$region=="Palestine"&master_forecast_dt$year%in%c(2023,2024)&master_forecast_dt$sex%in%c("m", "f")&master_forecast_dt$source=="lc_pcbs_2019",]
 
 pcbs_mx_23_24 <- pcbs_mx |> 
   select(year, sex, age, mx_noc) |>
@@ -75,10 +79,10 @@ mu_age_pcbs <- colSums(D_x_pcbs[,-1] + Dx_cmb_spread[,-1])/E_age
 #mu_x_pcbs <-  (D_x_pcbs[,-1])/E_x[,-1] 
 #mu_age_pcbs <- colSums(D_x_pcbs[,-1])/E_age
 
-### set the reported death toll (Palestine 2023: 22286, 2024: 24213)
+### set the reported death toll (Palestine 2023: 22286, 2024: 24213) (for 0ct23-oct 24: 42589)
 ### WB: 2023: 308, 2024: 494 
-## Gaza Strip: 2023: 21978,  2024: 23719 (for 2023-end of 2024: 45541)
-R = 41870 
+## Gaza Strip: 2023: 21978,  2024: 23719 (for 2023-end of 2024: 45541) (for 0ct23-oct 24: 41870)
+R = 42589
 ## total number of sexes 
 S = nrow(mu_x_pcbs)
 ## total number of age groups 
@@ -92,11 +96,16 @@ x <- as.numeric(colnames(mu_x_pcbs))
 ##-------------------------------
 
 ## compile the model (use truncated one for bts and un)
-compiled_model <- stan_model(paste0(model_dir, "bmmr_coverage_intervals_truncated.stan"))
+compiled_model <- stan_model(paste0(model_dir, "bmmr_coverage_intervals.stan"))
+# compiled_model <- stan_model(paste0(model_dir, "bmmr_coverage_intervals_truncated.stan"))
 
 model_out <- sampling(compiled_model,
                       # include = TRUE,
+<<<<<<< Updated upstream
                     sample_file=paste0(results_dir, "bts_samples_23_24.csv"), #writes the samples to CSV file
+=======
+                    sample_file=paste0(results_dir, "moh_samples_23_24.csv"), #writes the samples to CSV file
+>>>>>>> Stashed changes
                       iter =2000,
                       warmup=1000, #BURN IN
                       chains =4,

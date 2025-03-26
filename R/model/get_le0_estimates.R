@@ -13,12 +13,12 @@ setwd("U:/Documents/repos/uncertainty_quantification")
 model_dir <- paste0(getwd(),"/R/model/")
 
 # results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2019/2024/palestine_bu/")
-results_dir <- paste0(getwd(),"/R/sensitivity_check/samples/gaza_bu/")
+results_dir <- paste0(getwd(),"/R/sensitivity_check/samples_23_24/gaza/")
 
 # le0_noc <- readRDS("data/ex0_noc.rds")
 # le0_noc_23 <- le0_noc[le0_noc$year==2023&le0_noc$source=="lc_pcbs_2019"&le0_noc$region=="Palestine",]
 ## read in age distributions
-pi_x <- readRDS("data/pi_x_moh_2024.rds")
+pi_x <- readRDS("data/pi_x_moh_2024_gaza.rds")
 pi_x <- pi_x[pi_x$sex!="t",]
 pi_spread <- spread(pi_x[,c("sex", "age", "pi_x_mean")], key=age, value=pi_x_mean)
 x <- as.numeric(colnames(pi_spread)[2:19])
@@ -30,7 +30,11 @@ le_noc_list <- list(
   c(79.78170, 76.44891, 78.09980) ## palestine 2024
 )
 
-le_gaza_mean <- c(78.29336,  74.95395, 76.67211)
+le_gaza_23_24 <- c(78.25961,  75.00566, 76.72000)
+le_pst_23_24 <- c(79.73368,  76.38461, 78.04232)
+
+# le_pst_23_24 <- c(ex0_w_23_24 %>% filter(source == "lc_pcbs_2019" & year == 2023.5 & region == "Palestine") %>% arrange(sex) %>% .$ex_noc)
+
 
 ## read in samples 
 
@@ -72,9 +76,15 @@ all_lifetable_m <- Reduce(rbind,lifetable_m)
 all_lifetable_t <- Reduce(rbind,lifetable_t)
 
 ## scenarios:  "GMoH report", "B'Tselem historical average", "UN-IGME pattern"
+<<<<<<< Updated upstream
 lifetable_f_age0 <- get_le0_dt(all_lifetable_f, "Females", 2024,"UN-IGME pattern",le0= le_gaza_mean)
 lifetable_m_age0 <- get_le0_dt(all_lifetable_m, "Males", 2024,"UN-IGME pattern" ,le0= le_gaza_mean)
 lifetable_t_age0 <- get_le0_dt(all_lifetable_t, "Total", 2024,"UN-IGME pattern", le0= le_gaza_mean)
+=======
+lifetable_f_age0 <- get_le0_dt(all_lifetable_f, "Females", 2023.5,"B'Tselem historical average", le0= le_gaza_23_24)
+lifetable_m_age0 <- get_le0_dt(all_lifetable_m, "Males", 2023.5,"B'Tselem historical average",le0= le_gaza_23_24)
+lifetable_t_age0 <- get_le0_dt(all_lifetable_t, "Total", 2023.5, "B'Tselem historical average",le0= le_gaza_23_24)
+>>>>>>> Stashed changes
 
 ## histograms of the estimated life expectancies after accounting for reporting rate error 
 hist(lifetable_f_age0$ex)
@@ -112,7 +122,13 @@ g3 <- ggplot(data=lifetable_t_age0, aes(x=ex)) +
 
 gridExtra::grid.arrange(g1, g2, g3, ncol=3)
 
+<<<<<<< Updated upstream
 write.csv(lifetable_m_age0, paste0(results_dir, "un_geno24_lifetable_m_le0.csv"), row.names = FALSE)
 write.csv(lifetable_f_age0, paste0(results_dir, "un_geno24_lifetable_f_le0.csv"), row.names = FALSE)
 write.csv(lifetable_t_age0, paste0(results_dir, "un_geno24_lifetable_t_le0.csv"), row.names = FALSE)
+=======
+write.csv(lifetable_m_age0, paste0(results_dir, "bts_lifetable_m_le0.csv"), row.names = FALSE)
+write.csv(lifetable_f_age0, paste0(results_dir, "bts_lifetable_f_le0.csv"), row.names = FALSE)
+write.csv(lifetable_t_age0, paste0(results_dir, "bts_lifetable_t_le0.csv"), row.names = FALSE)
+>>>>>>> Stashed changes
 

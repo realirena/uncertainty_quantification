@@ -92,7 +92,7 @@ le0_plot <- ggplot() +
                     #  "GMoH", 
                     #  "Historical\naverage",
                     #  "UN-IGME")
-  xlab("Year") + ylab("Life exepcatncy at birth") +
+  xlab("Year") + ylab("Life expectancy at birth") +
   #scale_fill_manual(values=c("#fe9441","#85b5cd", "#DE9D0D")) + 
   facet_grid(~sex, scale = "free_y", space = "free_y", switch = "y") +
   scale_linetype_discrete(name="")+
@@ -205,7 +205,7 @@ le0_lss_23_24 <- gridExtra::grid.arrange(le0_23_24, lss_23_24)
 focus_male <- ggplot() + 
   stat_histinterval(data=le_lss_all %>% filter(region != "West Bank" & sex == "Males"), 
                     aes(x = year, y=ex, group=region, 
-                        fill=region, color=region),
+                        fill=region, color=region, pch =  region),
                     size=2,
                     alpha=0.5) +
   # scale_color_manual(values = c("#de5138", "#5a9cee", "#E69F00")) + 
@@ -236,7 +236,12 @@ focus_male <- ggplot() +
                     aes(x = year, y=ex, group=region, 
                         fill=region, color=region),
                     size=2,
-                    alpha=0.5) 
+                    alpha=0.5) +
+  geom_point(data = rbind(le_lss_all, le_lss_all24) %>%
+               filter(region != "West Bank" & sex == "Males") %>% filter(year >= 2023) %>%
+               group_by(region, year, sex, scenario) %>%
+               mutate(ex_mean = mean(ex)),
+             aes(x = year, y = ex_mean, color=region, pch =  region),  alpha = 1, size = 3)
 
 focus_female <- ggplot() + 
   stat_histinterval(data=le_lss_all %>% filter(region != "West Bank" & sex == "Females"), 
@@ -272,7 +277,12 @@ focus_female <- ggplot() +
                     aes(x = year, y=ex, group=region, 
                         fill=region, color=region),
                     size=2,
-                    alpha=0.5) 
+                    alpha=0.5) +
+  geom_point(data = rbind(le_lss_all, le_lss_all24) %>%
+               filter(region != "West Bank" & sex == "Females") %>% filter(year >= 2023) %>%
+               group_by(region, year, sex, scenario) %>%
+               mutate(ex_mean = mean(ex)),
+             aes(x = year, y = ex_mean, color=region, pch =  region),  alpha = 1, size = 3)
 
 
 ## This function allows us to specify which facet to annotate
@@ -307,8 +317,11 @@ le0_23_24_2 <- le0_23_24 +
   geom_segment(data = rect_data_m, aes(x = 2022, xend = 2017.8, y = 43, yend = 64), size = 0.5) +
   geom_segment(data = rect_data_f, aes(x = 2022, xend = 2017.8, y = 42, yend = 31), size = 0.5) +
   geom_segment(data = rect_data_f, aes(x = 2022, xend = 2017.8, y = 67, yend = 64), size = 0.5) +
-  guides(fill = guide_legend(override.aes = list(linetype = 0, pch = NA)),
-         linetype = guide_legend(order = 1),  shape = "none")
+  # guides(fill = guide_legend(override.aes = list(linetype = 0, pch = NA)),
+  #        linetype = guide_legend(order = 1),  shape = "none")
+  guides(shape = guide_legend(title = "Region", override.aes = list(linetype = 0, 
+                                                  color = c("#ef476f", "#FFA500", "#118ab2"), size = 6)),
+         linetype = guide_legend(order = 1), fill = "none")
 
 le0_23_24_2
 
