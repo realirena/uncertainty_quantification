@@ -11,11 +11,11 @@ setwd("U:/Documents/repos/uncertainty_quantification/")
 source("R/0_setup.R")
 ## set the working directory
 model_dir <- paste0(getwd(),"/R/sensitivity_check/")
-results_dir <- paste0(getwd(),"/R/sensitivity_check/samples/")
+results_dir <- paste0(getwd(),"/R/sensitivity_check/guillot_samples/")
 ## load the 2024 moh age distributions (as an example)
 ## un age dists: pi_x_un_2023_2024_gaza
 #bts age dists: pi_x_btselem_2023_2024_gaza
-pi_x_moh <- readRDS("data/pi_x_moh_2023_2024_gaza.rds")
+pi_x_moh <- readRDS("data/pi_x_un_2023_2024_gaza.rds")
 
 ## get the sex-specific age distributions 
 pi_x_moh <- pi_x_moh[pi_x_moh$sex!="t",]
@@ -92,11 +92,11 @@ x <- as.numeric(colnames(mu_x_pcbs))
 ##-------------------------------
 
 ## compile the model (use truncated one for bts and un)
-compiled_model <- stan_model(paste0(model_dir, "bmmr_change_prior.stan"))
+compiled_model <- stan_model(paste0(model_dir, "bmmr_change_prior_trunc.stan"))
 
 model_out <- sampling(compiled_model,
                       # include = TRUE,
-                    sample_file=paste0(results_dir, "moh_samples_v2.csv"), #writes the samples to CSV file
+                    sample_file=paste0(results_dir, "un_geno_samples.csv"), #writes the samples to CSV file
                       iter =2000,
                       warmup=1000, #BURN IN
                       chains =4,

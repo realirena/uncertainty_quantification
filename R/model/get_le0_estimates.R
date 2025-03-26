@@ -34,7 +34,7 @@ le_gaza_mean <- c(78.29336,  74.95395, 76.67211)
 
 ## read in samples 
 
-file_names <- c("moh_samples_23_24_1", "moh_samples_23_24_2", "moh_samples_23_24_3", "moh_samples_23_24_4")
+file_names <- c("bts_samples_23_24_1", "bts_samples_23_24_2", "bts_samples_23_24_3", "bts_samples_23_24_4")
 model_out <- read_stan_csv(paste0(results_dir, file_names,".csv"))
 
 ### extract the model-generated mortality distributions (incl WPP deaths)
@@ -72,9 +72,9 @@ all_lifetable_m <- Reduce(rbind,lifetable_m)
 all_lifetable_t <- Reduce(rbind,lifetable_t)
 
 ## scenarios:  "GMoH report", "B'Tselem historical average", "UN-IGME pattern"
-lifetable_f_age0 <- get_le0_dt(all_lifetable_f, "Females", 2024,"GMoH report", le0= le_gaza_mean)
-lifetable_m_age0 <- get_le0_dt(all_lifetable_m, "Males", 2024,"GMoH report",le0= le_gaza_mean)
-lifetable_t_age0 <- get_le0_dt(all_lifetable_t, "Total", 2024, "GMoH report",le0= le_gaza_mean)
+lifetable_f_age0 <- get_le0_dt(all_lifetable_f, "Females", 2024,"UN-IGME pattern",le0= le_gaza_mean)
+lifetable_m_age0 <- get_le0_dt(all_lifetable_m, "Males", 2024,"UN-IGME pattern" ,le0= le_gaza_mean)
+lifetable_t_age0 <- get_le0_dt(all_lifetable_t, "Total", 2024,"UN-IGME pattern", le0= le_gaza_mean)
 
 ## histograms of the estimated life expectancies after accounting for reporting rate error 
 hist(lifetable_f_age0$ex)
@@ -112,7 +112,7 @@ g3 <- ggplot(data=lifetable_t_age0, aes(x=ex)) +
 
 gridExtra::grid.arrange(g1, g2, g3, ncol=3)
 
-write.csv(lifetable_m_age0, paste0(results_dir, "moh_lifetable_m_le0.csv"), row.names = FALSE)
-write.csv(lifetable_f_age0, paste0(results_dir, "moh_lifetable_f_le0.csv"), row.names = FALSE)
-write.csv(lifetable_t_age0, paste0(results_dir, "moh_lifetable_t_le0.csv"), row.names = FALSE)
+write.csv(lifetable_m_age0, paste0(results_dir, "un_geno24_lifetable_m_le0.csv"), row.names = FALSE)
+write.csv(lifetable_f_age0, paste0(results_dir, "un_geno24_lifetable_f_le0.csv"), row.names = FALSE)
+write.csv(lifetable_t_age0, paste0(results_dir, "un_geno24_lifetable_t_le0.csv"), row.names = FALSE)
 

@@ -49,7 +49,7 @@ transformed parameters {
   matrix[S,X] mu_x_total; 
  // row_vector[X] D_baseline_age;
   
-  pr = pr_raw*0.4 + 0.8; //shifted beta distribution so that the mean is around 0.8 instead of 0.5 
+  pr = pr_raw*0.48 + 0.76; //shifted beta distribution so that the mean is around 0.8 instead of 0.5 
 
   tmp = sum(exp(theta_x));
   for(s in 1:S){
