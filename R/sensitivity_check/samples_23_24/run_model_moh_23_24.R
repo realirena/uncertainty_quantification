@@ -16,8 +16,7 @@ results_dir <- paste0(getwd(),"/R/sensitivity_check/samples_23_24/palestine/")
 ## un age dists: pi_x_un_2023_2024_gaza
 #bts age dists: pi_x_btselem_2023_2024_gaza
 
-pi_x_moh <- readRDS("data/pi_x_btselem_2023_2024_gaza.rds")
-
+pi_x_moh <- readRDS("data/pi_x_moh_2023_2024.rds")
 
 ## get the sex-specific age distributions 
 pi_x_moh <- pi_x_moh[pi_x_moh$sex!="t",]
@@ -99,6 +98,7 @@ compiled_model <- stan_model(paste0(model_dir, "bmmr_coverage_intervals.stan"))
 
 model_out <- sampling(compiled_model,
                       # include = TRUE,
+
 
                     sample_file=paste0(results_dir, "bts_samples_23_24.csv"), #writes the samples to CSV file
 

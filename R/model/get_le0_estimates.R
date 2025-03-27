@@ -121,3 +121,4 @@ write.csv(lifetable_m_age0, paste0(results_dir, "un_geno24_lifetable_m_le0.csv")
 write.csv(lifetable_f_age0, paste0(results_dir, "un_geno24_lifetable_f_le0.csv"), row.names = FALSE)
 write.csv(lifetable_t_age0, paste0(results_dir, "un_geno24_lifetable_t_le0.csv"), row.names = FALSE)
 
+
