@@ -12,6 +12,7 @@ source("R/0_setup.R")
 ## set the working directory
 model_dir <- paste0(getwd(),"/R/sensitivity_check/")
 results_dir <- paste0(getwd(),"/R/sensitivity_check/guillot_samples/")
+
 ## load the 2024 moh age distributions (as an example)
 ## un age dists: pi_x_un_2023_2024_gaza
 #bts age dists: pi_x_btselem_2023_2024_gaza
@@ -19,11 +20,13 @@ pi_x_moh <- readRDS("data/pi_x_un_2023_2024_gaza.rds")
 
 ## get the sex-specific age distributions 
 pi_x_moh <- pi_x_moh[pi_x_moh$sex!="t",]
-## un onyl: 
+## un only: 
 #pi_x_moh <- pi_x_moh[pi_x_moh$scenario=="genocide",]
 ## reshape the age distributions for the shape that we need for the model 
 pi_x= spread(pi_x_moh[,c("sex", "age", "pi_x_mean")], key=age, value=pi_x_mean)
 pi_sds= spread(pi_x_moh[,c("sex", "age", "pi_x_sd")], key=age, value=pi_x_sd)
+
+## get the upper and lower intervals (note that for GMoH, we don't use these)
 pi_ul = spread(pi_x_moh[,c("sex", "age", "pi_x_ul")], key=age, value=pi_x_ul)
 pi_ll = spread(pi_x_moh[,c("sex", "age", "pi_x_ll")], key=age, value=pi_x_ll)
 
