@@ -15,7 +15,10 @@ results_dir <- paste0(getwd(),"/R/sensitivity_check/samples_23_24/palestine/")
 ## load the 2024 moh age distributions (as an example)
 ## un age dists: pi_x_un_2023_2024_gaza
 #bts age dists: pi_x_btselem_2023_2024_gaza
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 pi_x_moh <- readRDS("data/pi_x_moh_2023_2024.rds")
 
 ## get the sex-specific age distributions 
@@ -98,10 +101,14 @@ compiled_model <- stan_model(paste0(model_dir, "bmmr_coverage_intervals.stan"))
 
 model_out <- sampling(compiled_model,
                       # include = TRUE,
+<<<<<<< Updated upstream
 
 
                     sample_file=paste0(results_dir, "bts_samples_23_24.csv"), #writes the samples to CSV file
 
+=======
+                    sample_file=paste0(results_dir, "moh_samples_23_24.csv"), #writes the samples to CSV file
+>>>>>>> Stashed changes
                       iter =2000,
                       warmup=1000, #BURN IN
                       chains =4,

@@ -119,3 +119,40 @@ ggplot(phi_vals) +
         legend.title=element_text(size=30),
         legend.text=element_text(size=30),
         axis.text.y = element_text(size=30))
+
+
+
+# Plot --------------------------------------------------------------------
+
+pr_prior_1 = data.frame("pr" = rbeta(100000, 2, 2)*0.14 + 0.52)
+pr_prior_2 = data.frame("pr" = rbeta(100000, 3, 3)*0.48 + 0.76)
+pr_prior <- cbind(serie = rep(c("Beta (2,2)*0.14 + 0.52", "Beta(3,3)*0.48 + 0.76"), each = 100000) , 
+                  pr = rbind(pr_prior_1, pr_prior_2))
+head(pr_prior)
+
+ggplot() + 
+  geom_density(data=pr_prior, aes(x=pr, fill=serie), alpha=0.5) +
+  geom_vline(data=pr_prior %>% filter(serie == "Beta (2,2)*0.14 + 0.52"), 
+                aes(xintercept=mean(pr)), size=1.25, linetype="dashed",color="black") + 
+     geom_vline(data=pr_prior %>% filter(serie == "Beta(3,3)*0.48 + 0.76"), 
+                aes(xintercept=mean(pr)), size=1.25, linetype="dashed",color="black") + 
+     labs(title = "", 
+          # subtitle="Mean: 1.0 (lower and upper bounds: 0.8 - 1.2)",
+          x="Probability of under- or over-reporting", y = "Density") + 
+  scale_fill_manual(values = c("#054fb9", "#b3c7f7"), name = "Prior") + 
+  xlim(c(0.5,1.3)) +
+  # scale_x_continuous(breaks = seq(0.5, 1.2, 0.1)) +
+  theme_classic() + 
+  theme(plot.title=element_text(size=14, hjust=0.5),
+  plot.subtitle = element_text(size=18, hjust=0.5),
+           axis.text.x = element_text(size=11,angle =45, vjust = 1, hjust = 1),
+           axis.title=element_text(size=12),
+           axis.text.y = element_blank(), 
+           axis.ticks.y = element_blank(),
+           legend.text = element_text(size=11),
+           legend.title = element_text(size=12),
+           legend.position = "bottom") +
+  annotate("text", label = "Mean: 0.59", x = .62, y = 11, hjust = 0) +
+  annotate("text", label = "Mean: 1.0", x = 1.05, y = 5, hjust = 0)
+
+ggsave(file = "figures/pr_priors.pdf", height = 4, width = 6)

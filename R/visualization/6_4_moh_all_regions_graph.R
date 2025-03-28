@@ -108,7 +108,8 @@ le0_plot <- ggplot() +
         legend.text = element_text(size = 12),
         legend.title = element_text(size = 13),
         axis.text = element_text(size = 11),
-        axis.title = element_text(size = 12))
+        axis.title = element_text(size = 12)) +
+  scale_y_continuous(limits = c(0,84),expand = c(0,0))
 
 ## plot of life expectancy loss
 lss_plot <-  ggplot() +   
@@ -220,6 +221,7 @@ focus_male <- ggplot() +
   guides(shape = "none", linetype = "none") +
   theme_bw()+
   scale_x_continuous(breaks = c(2023,2024)) +
+  scale_y_continuous(breaks = seq(30,60,5)) + 
   # guides(color = guide_legend(override.aes = list(linetype = 0)),
   #        linetype = guide_legend(order = 1))+ 
   theme(strip.background = element_blank(),
@@ -305,18 +307,18 @@ le0_23_24_2 <- le0_23_24 +
   # annotation_custom(grob = embedded_grob, xmin = 2012, xmax = 2020, ymin = 25, ymax = 60)
   annotation_custom2(grob=embedded_grob, 
                      data = data.frame(sex="Males"),
-                     xmin = 2013, xmax = 2018, ymin = 30, ymax = 65) +
+                     xmin = 2013, xmax = 2020, ymin = 6, ymax = 61) +
   annotation_custom2(grob=embedded_grob_f, 
                      data = data.frame(sex="Females"),
-                     xmin = 2013, xmax = 2018, ymin = 30, ymax = 65) +
+                     xmin = 2013, xmax = 2020, ymin = 6, ymax = 61) +
   geom_rect(data = rect_data_m, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
             fill = NA, color = "black", linewidth = 0.5, linetype = 2)  +
   geom_rect(data = rect_data_f, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
             fill = NA, color = "black", linewidth = 0.5, linetype = 2)  +
-  geom_segment(data = rect_data_m, aes(x = 2022, xend = 2017.8, y = 32, yend = 31), size = 0.5) +
-  geom_segment(data = rect_data_m, aes(x = 2022, xend = 2017.8, y = 43, yend = 64), size = 0.5) +
-  geom_segment(data = rect_data_f, aes(x = 2022, xend = 2017.8, y = 42, yend = 31), size = 0.5) +
-  geom_segment(data = rect_data_f, aes(x = 2022, xend = 2017.8, y = 67, yend = 64), size = 0.5) +
+  geom_segment(data = rect_data_m, aes(x = 2022, xend = 2019.755, y = 32, yend = 10), size = 0.5) +
+  geom_segment(data = rect_data_m, aes(x = 2022, xend = 2019.755, y = 60, yend = 60), size = 0.5) +
+  geom_segment(data = rect_data_f, aes(x = 2022, xend = 2019.75, y = 42, yend = 10), size = 0.5) +
+  geom_segment(data = rect_data_f, aes(x = 2022, xend = 2019.75, y = 67, yend = 60), size = 0.5) +
   # guides(fill = guide_legend(override.aes = list(linetype = 0, pch = NA)),
   #        linetype = guide_legend(order = 1),  shape = "none")
   guides(shape = guide_legend(title = "Region", override.aes = list(linetype = 0, 
@@ -325,6 +327,6 @@ le0_23_24_2 <- le0_23_24 +
 
 le0_23_24_2
 
-le0_lss_23_24 <- gridExtra::grid.arrange(le0_23_24_2, lss_23_24)
-
-ggsave(le0_23_24_2, file = "figures/LE_regions_zoom.pdf", height = 6.32, width = 9.12)
+# le0_lss_23_24 <- gridExtra::grid.arrange(le0_23_24_2, lss_23_24)
+# 
+ggsave(le0_23_24_2, file = "figures/LE_regions_zoom.pdf", height = 7.32, width = 9.12)

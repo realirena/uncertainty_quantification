@@ -76,7 +76,10 @@ all_lifetable_m <- Reduce(rbind,lifetable_m)
 all_lifetable_t <- Reduce(rbind,lifetable_t)
 
 ## scenarios:  "GMoH report", "B'Tselem historical average", "UN-IGME pattern"
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 lifetable_f_age0 <- get_le0_dt(all_lifetable_f, "Females", 2023.5,"B'Tselem historical average", le0= le_gaza_23_24)
 lifetable_m_age0 <- get_le0_dt(all_lifetable_m, "Males", 2023.5,"B'Tselem historical average",le0= le_gaza_23_24)
 lifetable_t_age0 <- get_le0_dt(all_lifetable_t, "Total", 2023.5, "B'Tselem historical average",le0= le_gaza_23_24)
@@ -117,8 +120,14 @@ g3 <- ggplot(data=lifetable_t_age0, aes(x=ex)) +
 
 gridExtra::grid.arrange(g1, g2, g3, ncol=3)
 
+<<<<<<< Updated upstream
 write.csv(lifetable_m_age0, paste0(results_dir, "un_geno24_lifetable_m_le0.csv"), row.names = FALSE)
 write.csv(lifetable_f_age0, paste0(results_dir, "un_geno24_lifetable_f_le0.csv"), row.names = FALSE)
 write.csv(lifetable_t_age0, paste0(results_dir, "un_geno24_lifetable_t_le0.csv"), row.names = FALSE)
 
+=======
+write.csv(lifetable_m_age0, paste0(results_dir, "bts_lifetable_m_le0.csv"), row.names = FALSE)
+write.csv(lifetable_f_age0, paste0(results_dir, "bts_lifetable_f_le0.csv"), row.names = FALSE)
+write.csv(lifetable_t_age0, paste0(results_dir, "bts_lifetable_t_le0.csv"), row.names = FALSE)
+>>>>>>> Stashed changes
 
