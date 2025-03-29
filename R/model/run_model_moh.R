@@ -10,8 +10,8 @@ setwd("U:/Documents/repos/uncertainty_quantification/")
 ## load the functions to calculate life expectancy 
 source("R/0_setup.R")
 ## set the working directory
-model_dir <- paste0(getwd(),"/R/sensitivity_check/")
-results_dir <- paste0(getwd(),"/R/sensitivity_check/samples/gaza_bu/")
+model_dir <- paste0(getwd(),"/R/model/diff_reporting/")
+results_dir <- paste0(getwd(),"/R/model/diff_reporting/samples/gaza")
 # results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2019/2023/palestine_bu/")
 ## load the 2024 moh age distributions (as an example)
 pi_x_moh <- readRDS("data/pi_x_moh_2023_gaza.rds")
@@ -27,7 +27,6 @@ pi_ll = spread(pi_x_moh[,c("sex", "age", "pi_x_ll")], key=age, value=pi_x_ll)
 ## we want E(log(theta)) and sd(log(theta)), so apply Delta method to the means and sds: 
 pi_mu = log(pi_x[,-1])
 pi_sd = pi_sds[,-1]/pi_x[,-1]
-
 ##-------------------------------
 ## read in the exposure and the forecasted baseline mortality 
 ##-------------------------------
@@ -77,9 +76,17 @@ R =21978
 S = nrow(mu_x_pcbs)
 ## total number of age groups 
 X = ncol(mu_x_pcbs)
-
 ## age groups 
 x <- as.numeric(colnames(mu_x_pcbs))
+
+### set different reporting rates for each age group (note that pr_ul and pr_ll are flipped and ul = lower bound):
+rep_rate_grp <- readRDS("data/pr_age.rds")
+rep_rate_grp <- rep_rate_grp[rep_rate_grp$sex%in%c("Female", "Male"),]
+rep_ll <-  spread(rep_rate_grp[,c("sex", "agegrp", "pr_ul")], key=agegrp, value=pr_ul)
+rep_int <-  spread(rep_rate_grp[,c("sex", "agegrp", "int")], key=agegrp, value=int)
+
+### indicator for the reporting rates 
+age_cat_ind  <- c(rep(1, 4), rep(2,3), rep(3, 3), rep(4, 3), rep(5 ,5))
 
 ##-------------------------------
 ## setting up and running the Bayesian model 
@@ -87,7 +94,7 @@ x <- as.numeric(colnames(mu_x_pcbs))
 
 ## compile the model 
 # compiled_model <- stan_model(paste0(model_dir, "bmmr_coverage_intervals.stan"))
-compiled_model <- stan_model(paste0(model_dir, "bmmr_change_prior.stan"))
+compiled_model <- stan_model(paste0(model_dir, "bmmr.stan"))
 
 model_out <- sampling(compiled_model,
                       # include = TRUE,
@@ -108,7 +115,10 @@ model_out <- sampling(compiled_model,
                         pi_sd = pi_sd, 
                         R = R,
                         S = S,
-                        X= X))
+                        X= X,
+                        rep_ll = rep_ll,
+                        rep_int = rep_int,
+                        age_cat_ind = age_cat_ind))
 ## check for convergence
 # 
 # rstan::traceplot(model_out, pars=c("mu_age_total[1]", "pi_x[1,1]", "pi_x[1,3]", "pr"))

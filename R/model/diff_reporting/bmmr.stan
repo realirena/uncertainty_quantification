@@ -13,12 +13,16 @@ data {
   int<lower=1> X; // number of age categories 
   int<lower=1> R; // reported deaths 
   int<lower=2> S; // number of sexes
+  int<lower=1> rep_cat; // number of reporting rate age groups 
   matrix[S,X] E_x; // exposures by age group and sex 
   vector[X] E_age; // exposures by age group 
   matrix[S, X] pi_x_hat; // sex-specific means age-distributions - this model assumes they are inputs, but we can code a model for the age groups 
   matrix[S,X] pi_sd; // lower bounds for the age distribution estimates 
   matrix[S,X] mu_x_noc; //baseline mortality from the WPP 
   vector[X] mu_age_noc; // age specific baseline mortality
+  matrix[S, rep_cat] rep_ll; // lower bound for the reporting rate 
+  matrix[S, rep_cat] rep_int; //interval length for the reporting rate
+  vector[X] rep_cat_ind; // list of length X indicating which reporting rate each age group should take 
 }
 
 transformed data {
@@ -45,11 +49,16 @@ transformed parameters {
   real tmp;
   matrix[S, X] mu_x; // mortality rate in each age-sex group 
   matrix[S,X] log_mu_x; 
-  real pr;
+  matrix[S, rep_cat] pr;
   matrix[S,X] mu_x_total; 
  // row_vector[X] D_baseline_age;
   
-  pr = pr_raw*0.14 + 0.52; //shifted beta distribution so that the mean is around 0.8 instead of 0.5 
+  for(s in 1:S){ 
+    for(r in 1:rep_cat){
+        pr[s,r] = pr_raw*rep_int[s,r] + rep_ll[s,r]; //shifted according to each age group 
+    }
+  }
+
 
   tmp = sum(exp(theta_x));
   for(s in 1:S){
@@ -64,7 +73,7 @@ transformed parameters {
   for(s in 1:S){
     for(x in 1:X){
       R_x[s,x] =pi_x[s,x]*R; // generating each R_x from the age distributions 
-      log_mu_x[s,x] = log(R_x[s,x]/E_x[s,x]) -log(pr); //compute the age-specific mortality rates 
+      log_mu_x[s,x] = log(R_x[s,x]/E_x[s,x]) -log(pr[s, rep_cat_ind[x]]); //compute the age-specific mortality rates 
       mu_x[s,x] = exp(log_mu_x[s,x]);  //exponentiate the mortality 
       mu_x_total[s,x] =  mu_x[s,x] + mu_x_noc[s,x]; 
      }

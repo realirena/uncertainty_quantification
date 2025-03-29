@@ -156,3 +156,26 @@ ggplot() +
   annotate("text", label = "Mean: 1.0", x = 1.05, y = 5, hjust = 0)
 
 ggsave(file = "figures/pr_priors.pdf", height = 4, width = 6)
+
+
+rep_rate_grp <- readRDS("data/pr_age.rds")
+set.seed(1234)
+pr_prior =rbeta(10000,4, 2)*0.3536502+0.2255704
+mean(pr_prior)
+hist(pr_prior)
+
+pr_prior = (rbeta(100,6,1)*as.numeric(rep_rate_grp[2,5])) + as.numeric(rep_rate_grp[2,4]- rep_rate_grp[2,5])
+hist(pr_prior)
+mean(pr_prior)
+rep_rate_grp[2,3]
+
+pr_prior = (rbeta(10000,5,2)*as.numeric(rep_rate_grp[3,5])) + as.numeric(rep_rate_grp[3,4]- rep_rate_grp[3,5])
+hist(pr_prior)
+mean(pr_prior)
+rep_rate_grp[3,3]
+### age group 0: female (beta(7,2))
+## age group 0: male ( )
+## age group 60 male: beta(4,2)
+
+
+
