@@ -141,7 +141,11 @@ le0_23_24  <- le0_plot +  stat_histinterval(data=le_lss_all24, aes(x = year, y=e
   geom_point(data = le_lss_all24 %>% filter(year >= 2023) %>%
                group_by(year, sex, scenario) %>%
                mutate(ex_mean = mean(ex)),
-             aes(x = year, y = ex_mean, color=scenario, pch =  scenario),  alpha = 1, size = 3) 
+             aes(x = year, y = ex_mean, color=scenario, pch =  scenario),  alpha = 1, size = 3) +
+  guides(shape = guide_legend(title = "Scenario", override.aes = list(linetype = 0, 
+                                                                    color = c("#07c8ba","#ef476f",  "#3aab07"), size = 6)),
+         fill = "none")
+
 
 
 # ggsave(le0_23_24, file = "figures/LE_sources_zoom.pdf", width = 8.75, height = 5.25)
