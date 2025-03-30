@@ -42,19 +42,22 @@ panels <- tibble(sex = rep(c("Females", "Males", "Total"), 2),
 
 ### add new graphing code to plot the uncertainty estimates: 
 results_dir <- paste0(getwd(),"/R/sensitivity_check/samples_23_24/")
+
+### add new graphing code to plot the 2024 uncertainty estimates: 
+results_dir <- paste0(getwd(),"/R/model/diff_reporting/samples/gaza/")
 vars <- c("ex", "bmmr_lss","year", "sex", "scenario")
 
 ## oct 26th results (updated with age distribution uncertainty)
-oct26_le_m_age0 <- read.csv(paste0(results_dir, "moh_lifetable_m_le0.csv"))
-oct26_le_f_age0 <- read.csv(paste0(results_dir, "moh_lifetable_f_le0.csv"))
-oct26_le_t_age0 <- read.csv(paste0(results_dir, "moh_lifetable_t_le0.csv"))
+oct26_le_m_age0 <- read.csv(paste0(results_dir, "moh23_lifetable_m_le0.csv"))
+oct26_le_f_age0 <- read.csv(paste0(results_dir, "moh23_lifetable_f_le0.csv"))
+oct26_le_t_age0 <- read.csv(paste0(results_dir, "moh23_lifetable_t_le0.csv"))
 
 oct_26_all <- rbind(oct26_le_f_age0[,vars], oct26_le_m_age0[,vars], oct26_le_t_age0[,vars])
 
 ## B'tselem results
-bts_le_m_age0 <- read.csv(paste0(results_dir, "bts_lifetable_m_le0.csv"))
-bts_le_f_age0 <- read.csv(paste0(results_dir, "bts_lifetable_f_le0.csv"))
-bts_le_t_age0 <- read.csv(paste0(results_dir, "bts_lifetable_t_le0.csv"))
+bts_le_m_age0 <- read.csv(paste0(results_dir, "bts23_lifetable_m_le0.csv"))
+bts_le_f_age0 <- read.csv(paste0(results_dir, "bts23_lifetable_f_le0.csv"))
+bts_le_t_age0 <- read.csv(paste0(results_dir, "bts23_lifetable_t_le0.csv"))
 
 bts_all <- rbind(bts_le_f_age0[,vars], bts_le_m_age0[,vars], bts_le_t_age0[,vars])
 
@@ -62,9 +65,9 @@ bts_all <- rbind(bts_le_f_age0[,vars], bts_le_m_age0[,vars], bts_le_t_age0[,vars
 # UN genocide pattern -----------------------------------------------------
 
 ###UN dist results 
-un_le_m_geno23 <- read.csv(paste0(results_dir, "un_geno_lifetable_m_le0.csv"))
-un_le_f_geno23 <- read.csv(paste0(results_dir, "un_geno_lifetable_f_le0.csv"))
-un_le_t_geno23 <- read.csv(paste0(results_dir, "un_geno_lifetable_t_le0.csv"))
+un_le_m_geno23 <- read.csv(paste0(results_dir, "un_geno23_lifetable_m_le0.csv"))
+un_le_f_geno23 <- read.csv(paste0(results_dir, "un_geno23_lifetable_f_le0.csv"))
+un_le_t_geno23 <- read.csv(paste0(results_dir, "un_geno23_lifetable_t_le0.csv"))
 
 un_genocide23_all <- rbind(un_le_f_geno23[,vars], un_le_m_geno23[,vars], un_le_t_geno23[,vars])
 
@@ -143,19 +146,17 @@ le0_lss <- ggarrange(le0_plot, lss_plot, nrow = 2, common.legend = TRUE, legend 
 #ggsave("figures/le0_lss_gaza_sources_23_24.png", plot=le0_lss, w = 16, h = 8)
 
 
-### add new graphing code to plot the 2024 uncertainty estimates: 
-results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2019/2024/gaza/")
 ## MoH 2024 (oct 23 - oct 24) results
-moh_le_m_24 <- read.csv(paste0(results_dir, "moh_lifetable_m_le0.csv"))
-moh_le_f_24 <- read.csv(paste0(results_dir, "moh_lifetable_f_le0.csv"))
-moh_le_t_24 <- read.csv(paste0(results_dir, "moh_lifetable_t_le0.csv"))
+moh_le_m_24 <- read.csv(paste0(results_dir, "moh24_lifetable_m_le0.csv"))
+moh_le_f_24 <- read.csv(paste0(results_dir, "moh24_lifetable_f_le0.csv"))
+moh_le_t_24 <- read.csv(paste0(results_dir, "moh24_lifetable_t_le0.csv"))
 
 moh_24_all  <- rbind(moh_le_m_24[,vars], moh_le_f_24[,vars],moh_le_t_24[,vars])
 
 
-bts_le_m_24 <- read.csv(paste0(results_dir, "bts_lifetable_m_le0.csv"))
-bts_le_f_24 <- read.csv(paste0(results_dir, "bts_lifetable_f_le0.csv"))
-bts_le_t_24 <- read.csv(paste0(results_dir, "bts_lifetable_t_le0.csv"))
+bts_le_m_24 <- read.csv(paste0(results_dir, "bts24_lifetable_m_le0.csv"))
+bts_le_f_24 <- read.csv(paste0(results_dir, "bts24_lifetable_f_le0.csv"))
+bts_le_t_24 <- read.csv(paste0(results_dir, "bts24_lifetable_t_le0.csv"))
 
 bts24_all <- rbind(bts_le_f_24[,vars], bts_le_m_24[,vars], bts_le_t_24[,vars])
 
@@ -182,7 +183,7 @@ lss_23_24  <-  lss_plot +  stat_histinterval(data=le_lss_geno_all24, aes(x = yea
 
 le0_lss_23_24 <- ggarrange(le0_23_24, lss_23_24, nrow = 2, common.legend = TRUE, legend = "bottom")
 
-ggsave(le0_lss_23_24, file = "figures/LE_sources_gaza_genocide_v2.pdf", width = 16, height = 8)
+ggsave(le0_lss_23_24, file = "figures/LE_sources_gaza_genocide_v3.pdf", width = 16, height = 8)
 
 # ggsave("figures/un_conflict_pix/le0_lss_gaza_23_24.png", plot=le0_lss_23_24,
 #        w = 16, h = 8)
