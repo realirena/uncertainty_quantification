@@ -185,7 +185,7 @@ le0_lss_23_24 <- ggarrange(le0_23_24, lss_23_24, nrow = 2, common.legend = TRUE,
 
 ggsave(le0_lss_23_24, file = "figures/LE_sources_gaza_genocide_v3.pdf", width = 16, height = 8)
 
-# ggsave("figures/un_conflict_pix/le0_lss_gaza_23_24.png", plot=le0_lss_23_24,
+# ggsave("figures/un_conflict_pix/le0_lss_gaza_23_24.pdf", plot=le0_lss_23_24,
 #        w = 16, h = 8)
 
 
