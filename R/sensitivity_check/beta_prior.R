@@ -157,25 +157,88 @@ ggplot() +
 
 ggsave(file = "figures/pr_priors.pdf", height = 4, width = 6)
 
-
+#### different reporting rates 
 rep_rate_grp <- readRDS("data/pr_age.rds")
+
+rep_rate_grp$int <- rep_rate_grp$pr_ll - rep_rate_grp$pr_ul
+rep_rate_grp <- rep_rate_grp[rep_rate_grp$sex%in%c("Female", "Male"),]
+rep_ll <-  spread(rep_rate_grp[,c("sex", "agegrp", "pr_ul")], key=agegrp, value=pr_ul)
+rep_int <-  spread(rep_rate_grp[,c("sex", "agegrp", "int")], key=agegrp, value=int)
+### 
+rep_cat = 5 
+
+
+file_names <- c("moh24_samples_1","moh24_samples_2", "moh24_samples_3", "moh24_samples_4")
+model_out <- read_stan_csv(paste0(results_dir, file_names,".csv"))
+
+data.frame(summary(model_out, pars=c("pr"))$summary)
+### extract the model-generated mortality distributions (incl WPP deaths)
+pr_samples = data.frame(extract(model_out, pars=c("pr"))$pr)
+
+
 set.seed(1234)
-pr_prior =rbeta(10000,4, 2)*0.3536502+0.2255704
+pr_prior =rbeta(10000,2, 2)*0.3536502+0.2255704
 mean(pr_prior)
 hist(pr_prior)
+rep_rate_grp[10,3]
 
-pr_prior = (rbeta(100,6,1)*as.numeric(rep_rate_grp[2,5])) + as.numeric(rep_rate_grp[2,4]- rep_rate_grp[2,5])
+pr_prior = (rbeta(10000,2,2)*as.numeric(rep_rate_grp[2,4]- rep_rate_grp[2,5])) + as.numeric(rep_rate_grp[2,5])
 hist(pr_prior)
 mean(pr_prior)
 rep_rate_grp[2,3]
 
-pr_prior = (rbeta(10000,5,2)*as.numeric(rep_rate_grp[3,5])) + as.numeric(rep_rate_grp[3,4]- rep_rate_grp[3,5])
+pr_prior = (rbeta(10000,2,2)*as.numeric(rep_rate_grp[3,4]- rep_rate_grp[3,5]) + as.numeric(rep_rate_grp[3,5]))
 hist(pr_prior)
 mean(pr_prior)
 rep_rate_grp[3,3]
+
+
+pr_prior = (rbeta(10000,2,2)*as.numeric(rep_rate_grp[4,4]- rep_rate_grp[4,5]) + as.numeric(rep_rate_grp[4,5]))
+hist(pr_prior)
+mean(pr_prior)
+rep_rate_grp[4,3]
+
+pr_prior = (rbeta(10000,2,2)*as.numeric(rep_rate_grp[5,4]- rep_rate_grp[5,5]) + as.numeric(rep_rate_grp[5,5]))
+hist(pr_prior)
+mean(pr_prior)
+rep_rate_grp[5,3]
+
+
+pr_prior = (rbeta(10000,2,2)*as.numeric(rep_rate_grp[6,4]- rep_rate_grp[6,5]) + as.numeric(rep_rate_grp[6,5]))
+hist(pr_prior)
+mean(pr_prior)
+rep_rate_grp[6,3]
+
+
+pr_prior = (rbeta(10000,2,2)*as.numeric(rep_rate_grp[7,4]- rep_rate_grp[7,5]) + as.numeric(rep_rate_grp[7,5]))
+hist(pr_prior)
+mean(pr_prior)
+rep_rate_grp[7,3]
+
+
+pr_prior = (rbeta(10000,2,2)*as.numeric(rep_rate_grp[8,4]- rep_rate_grp[8,5]) + as.numeric(rep_rate_grp[8,5]))
+hist(pr_prior)
+mean(pr_prior)
+rep_rate_grp[8,3]
+
+pr_prior = (rbeta(10000,2,2)*as.numeric(rep_rate_grp[9,4]- rep_rate_grp[9,5]) + as.numeric(rep_rate_grp[9,5]))
+hist(pr_prior)
+mean(pr_prior)
+rep_rate_grp[9,3]
+
+pr_prior = (rbeta(10000,2,2)*as.numeric(rep_rate_grp[10,4]- rep_rate_grp[10,5]) + as.numeric(rep_rate_grp[10,5]))
+hist(pr_prior)
+mean(pr_prior)
+rep_rate_grp[10,3]
+
+pr_prior = (rbeta(10000,2,2)*as.numeric(rep_rate_grp[10,4]- rep_rate_grp[10,5]) + as.numeric(rep_rate_grp[10,5]))
+hist(pr_prior)
+mean(pr_prior)
+rep_rate_grp[10,3]
+
 ### age group 0: female (beta(7,2))
 ## age group 0: male ( )
 ## age group 60 male: beta(4,2)
 
-
-
+unique(rep_rate_grp$agegrp)
+unique(pi_x_moh$age)
