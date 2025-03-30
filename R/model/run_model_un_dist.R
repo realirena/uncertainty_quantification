@@ -15,12 +15,12 @@ options(mc.cores = parallel::detectCores(logical= FALSE))
 ## set the working directory
 ## set the working directory
 setwd("U:/Documents/repos/uncertainty_quantification/")
-model_dir <- paste0(getwd(),"/R/model/")
-results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2019/2023/palestine_bu/")
+model_dir <- paste0(getwd(),"/R/model/diff_reporting/")
+results_dir <- paste0(getwd(),"/R/model/diff_reporting/samples/gaza/")
 # results_dir <- paste0(getwd(),"/R/sensitivity_check/samples/palestine_bu/")
 
 ## read in age distributions (UN)
-pi_x_un <- readRDS("data/pi_x_un_2023.rds")
+pi_x_un <- readRDS("data/pi_x_un_2023_gaza.rds")
 pi_x_un <- pi_x_un[pi_x_un$sex!="t",]
 
 pi_x_un_conflict <- pi_x_un[pi_x_un$scenario=="conflict",]
@@ -28,10 +28,10 @@ pi_x_un_geno <- pi_x_un[pi_x_un$scenario=="genocide",]
 pi_x_un_earth <- pi_x_un[pi_x_un$scenario=="earthquake",]
 
 
-pi_x= spread(pi_x_un_geno[,c("sex", "age", "pi_x_mean")], key=age, value=pi_x_mean)
-pi_sds= spread(pi_x_un_geno[,c("sex", "age", "pi_x_sd")], key=age, value=pi_x_sd)
-pi_ul = spread(pi_x_un_geno[,c("sex", "age", "pi_x_ul")], key=age, value=pi_x_ul)
-pi_ll = spread(pi_x_un_earth[,c("sex", "age", "pi_x_ll")], key=age, value=pi_x_ll)
+pi_x= spread(pi_x_un_conflict[,c("sex", "age", "pi_x_mean")], key=age, value=pi_x_mean)
+pi_sds= spread(pi_x_un_conflict[,c("sex", "age", "pi_x_sd")], key=age, value=pi_x_sd)
+pi_ul = spread(pi_x_un_conflict[,c("sex", "age", "pi_x_ul")], key=age, value=pi_x_ul)
+pi_ll = spread(pi_x_un_conflict[,c("sex", "age", "pi_x_ll")], key=age, value=pi_x_ll)
 ## parameters for the age distribution priors 
 ## Delta method for E(log(theta))
 pi_mu = log(pi_x[,-1])
@@ -40,7 +40,7 @@ pi_sd = pi_sds[,-1]/pi_x[,-1]
 
 ## read in exposure data:
 master_forecast_dt <- readRDS("R/lc/data_plus_forecasts_v2.rds")
-pcbs_exp  <- master_forecast_dt[master_forecast_dt$region=="Palestine"&master_forecast_dt$year==2023&master_forecast_dt$sex%in%c("m", "f")&master_forecast_dt$source=="pcbs",]
+pcbs_exp  <- master_forecast_dt[master_forecast_dt$region=="Gaza Strip"&master_forecast_dt$year==2023&master_forecast_dt$sex%in%c("m", "f")&master_forecast_dt$source=="pcbs",]
 ## number of exposures by age
 E_x = spread(pcbs_exp[,c("sex", "age","pop")], key=age, value=pop)
 ## exposures by age 
@@ -50,7 +50,7 @@ E = sum(rowSums(E_x[,-1]))
 
 
 ## reshape the forecasted baseline mortality as well 
-pcbs_mx<-  master_forecast_dt[master_forecast_dt$region=="Palestine"&master_forecast_dt$year==2023&master_forecast_dt$sex%in%c("m", "f")&master_forecast_dt$source=="lc_pcbs_2019",]
+pcbs_mx<-  master_forecast_dt[master_forecast_dt$region=="Gaza Strip"&master_forecast_dt$year==2023&master_forecast_dt$sex%in%c("m", "f")&master_forecast_dt$source=="lc_pcbs_2019",]
 
 pcbs_mx_mean <- pcbs_mx |> 
   select(year, sex, age, mx_noc) |>
@@ -79,7 +79,7 @@ mu_age_pcbs <- colSums(D_x_pcbs[,-1] + Dx_cmb_spread[,-1])/E_age
 ### get reported cumulative death count (Palestine 2023: 22130, 2024: 24217)
 ### WB: 2023: 308, 2024: 498 
 ## Gaza Strip: 2023: 21822,  2024: 23719
-R = 22130
+R =21822
 ### multiply R by the age distribution to get R_x 
 R_x = pi_x[,-1]*R
 
@@ -90,8 +90,18 @@ R_x = round(R_x)
 S = nrow(R_x)
 X = ncol(R_x)
 
+### set different reporting rates for each age group (note that pr_ul and pr_ll are flipped and ul = lower bound):
+rep_rate_grp <- readRDS("data/pr_age.rds")
+rep_rate_grp <- rep_rate_grp[rep_rate_grp$sex%in%c("Female", "Male"),]
+rep_rate_grp$int <- rep_rate_grp$pr_ll - rep_rate_grp$pr_ul
+rep_ll <-  spread(rep_rate_grp[,c("sex", "agegrp", "pr_ul")], key=agegrp, value=pr_ul)
+rep_int <-  spread(rep_rate_grp[,c("sex", "agegrp", "int")], key=agegrp, value=int)
+
+### indicator for the reporting rates 
+rep_cat_ind  <- c(rep(1, 4), rep(2,3), rep(3, 3), rep(4, 3), rep(5 ,5))
+rep_cat <- ncol(rep_ll) - 1 
 ## compile the model (uncomment these lines if you wish to run the model again)
-compiled_model <- stan_model(paste0(model_dir, "bmmr_coverage_intervals_truncated.stan"))
+compiled_model <- stan_model(paste0(model_dir, "bmmr_trunc.stan"))
 
 model_out <- sampling(compiled_model,
                     # include = TRUE,
@@ -113,4 +123,9 @@ model_out <- sampling(compiled_model,
                     L = log(pi_ll[,-1]), 
                     R = R,
                     S = S,
-                    X= X))
+                    X= X,
+                    rep_cat = rep_cat,
+                    rep_ll = rep_ll[,-1],
+                    rep_int = rep_int[,-1],
+                    rep_cat_ind = rep_cat_ind)
+                    )
