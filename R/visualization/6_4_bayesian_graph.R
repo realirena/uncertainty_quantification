@@ -47,7 +47,7 @@ results_dir <- paste0(getwd(),"/R/sensitivity_check/samples_23_24/")
 results_dir <- paste0(getwd(),"/R/model/diff_reporting/samples/gaza/")
 vars <- c("ex", "bmmr_lss","year", "sex", "scenario")
 
-## oct 26th results (updated with age distribution uncertainty)
+## moh results
 moh23_le_m_age0 <- read.csv(paste0(results_dir, "moh23_lifetable_m_le0.csv"))
 moh23_le_f_age0 <- read.csv(paste0(results_dir, "moh23_lifetable_f_le0.csv"))
 moh23_le_t_age0 <- read.csv(paste0(results_dir, "moh23_lifetable_t_le0.csv"))
