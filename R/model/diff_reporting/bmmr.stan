@@ -18,7 +18,7 @@ data {
   vector[X] E_age; // exposures by age group 
   matrix[S, X] pi_x_hat; // sex-specific means age-distributions - this model assumes they are inputs, but we can code a model for the age groups 
   matrix[S,X] pi_sd; // lower bounds for the age distribution estimates 
-  matrix[S,X] mu_x_noc; //baseline mortality from the WPP 
+  matrix[S,X] mu_x_noc; //baseline mortality (age-sex)
   vector[X] mu_age_noc; // age specific baseline mortality
   matrix[S, rep_cat] rep_ll; // lower bound for the reporting rate 
   matrix[S, rep_cat] rep_int; //interval length for the reporting rate
