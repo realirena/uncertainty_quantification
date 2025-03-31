@@ -15,11 +15,11 @@ results_dir <- paste0(getwd(),"/R/model/diff_reporting/samples/gaza/")
 ## load the 2024 moh age distributions (as an example)
 ## un age dists: pi_x_un_2023_2024_gaza
 #bts age dists: pi_x_btselem_2023_2024_gaza
-pi_x_moh <- readRDS("data/pi_x_moh_2023_2024_gaza.rds")
+pi_x_moh <- readRDS("data/pi_x_btselem_2023_2024_gaza.rds")
 
 ## get the sex-specific age distributions 
 pi_x_moh <- pi_x_moh[pi_x_moh$sex!="t",]
-## un onyl: 
+## un only: 
 #pi_x_moh <- pi_x_moh[pi_x_moh$scenario=="genocide",]
 ## reshape the age distributions for the shape that we need for the model 
 pi_x= spread(pi_x_moh[,c("sex", "age", "pi_x_mean")], key=age, value=pi_x_mean)
@@ -102,11 +102,11 @@ rep_cat <- ncol(rep_ll) - 1
 ##-------------------------------
 
 ## compile the model (use truncated one for bts and un)
-compiled_model <- stan_model(paste0(model_dir, "bmmr.stan"))
+compiled_model <- stan_model(paste0(model_dir, "bmmr_trunc.stan"))
 
 model_out <- sampling(compiled_model,
                       # include = TRUE,
-                    sample_file=paste0(results_dir, "moh_23_24_samples.csv"), #writes the samples to CSV file
+                    sample_file=paste0(results_dir, "bts_23_24_samples.csv"), #writes the samples to CSV file
                       iter =2000,
                       warmup=1000, #BURN IN
                       chains =4,

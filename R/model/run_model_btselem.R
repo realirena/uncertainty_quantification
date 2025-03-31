@@ -13,11 +13,9 @@ options(mc.cores = parallel::detectCores(logical= FALSE))
 source("R/0_setup.R")
 
 ## set up model + results directory
-# model_dir <- paste0(getwd(),"/R/sensitivity_check/")
-# results_dir <- paste0(getwd(),"/R/sensitivity_check/samples/palestine_bu/")
 model_dir <- paste0(getwd(),"/R/model/diff_reporting/")
 results_dir <- paste0(getwd(),"/R/model/diff_reporting/samples/palestine/")
-## load the 2024 moh age distributions (as an example)
+
 ## read in age distributions (btselem data)
 pi_x_selem <- readRDS("data/pi_x_btselem_2024.rds")
 pi_x_selem <- pi_x_selem[pi_x_selem$sex!="t",]
@@ -42,7 +40,6 @@ E_age =colSums(E_x[,-1])
 ## get total exposures 
 E = sum(rowSums(E_x[,-1]))
 
-
 ## reshape the forecasted baseline mortality as well 
 pcbs_mx<-  master_forecast_dt[master_forecast_dt$region=="Palestine"&master_forecast_dt$year==2024&master_forecast_dt$sex%in%c("m", "f")&master_forecast_dt$source=="lc_pcbs_2019",]
 
@@ -58,11 +55,6 @@ D_x_pcbs= spread(pcbs_mx_mean[,c("sex", "age","mean_Dx_noc")], key=age, value=me
 ### 2023 only: combatants
 Dx_cmb <- readRDS("data/Dx_cmb.rds")
 Dx_cmb_spread <- spread(Dx_cmb, key=age, value=Dx_cmb_mean)
-
-#Dx_cmb <- readRDS("data/Dx_cmb.rds")
-#Dx_cmb_spread <- spread(Dx_cmb, key=age, value=Dx_cmb_mean)
-#D_x_int = round(D_x_pcbs[,-1])
-
 ## age-sex specific mortality rates (for 2023 ONLY - add combatants)
 # mu_x_pcbs <-  (D_x_pcbs[,-1] + Dx_cmb_spread[,-1])/E_x[,-1] 
 # mu_age_pcbs <- colSums(D_x_pcbs[,-1] + Dx_cmb_spread[,-1])/E_age
@@ -84,7 +76,6 @@ mu_x_hat = R_x/E_x[,-1]
 R_x = round(R_x)
 S = nrow(R_x)
 X = ncol(R_x)
-
 
 ### set different reporting rates for each age group (note that pr_ul and pr_ll are flipped and ul = lower bound):
 rep_rate_grp <- readRDS("data/pr_age.rds")
@@ -125,10 +116,3 @@ model_out <- sampling(compiled_model,
                         rep_int = rep_int[,-1],
                         rep_cat_ind = rep_cat_ind)
 )
-
-## check for convergence
-# 
-# rstan::traceplot(model_out, pars=c("mu_age_total[1]", "pi_x[1,1]", "pi_x[1,3]", "pr"))
-rstan::traceplot(model_out, pars=c("pr", "pi_x[1,1]", "pi_x[2,1]"))
-pairs(model_out, pars=c("pi_x[2,1]", "pi_x[1,1]","mu_x_total[1,1]", "mu_age_total[1]", "lp__"))
-other_pars <- data.frame(summary(model_out, pars=c("pi_x"))$summary)
