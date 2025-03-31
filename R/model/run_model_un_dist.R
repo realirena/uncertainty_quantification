@@ -13,25 +13,24 @@ options(mc.cores = parallel::detectCores(logical= FALSE))
 ## load the functions to calculate life expectancy 
 #source("R/0_setup.R")
 ## set the working directory
-## set the working directory
 setwd("U:/Documents/repos/uncertainty_quantification/")
 model_dir <- paste0(getwd(),"/R/model/diff_reporting/")
 results_dir <- paste0(getwd(),"/R/model/diff_reporting/samples/palestine/")
-# results_dir <- paste0(getwd(),"/R/sensitivity_check/samples/palestine_bu/")
-
 ## read in age distributions (UN)
 pi_x_un <- readRDS("data/pi_x_un_2024.rds")
 pi_x_un <- pi_x_un[pi_x_un$sex!="t",]
 
+## get the age dists by scenario
 pi_x_un_conflict <- pi_x_un[pi_x_un$scenario=="conflict",]
 pi_x_un_geno <- pi_x_un[pi_x_un$scenario=="genocide",]
 pi_x_un_earth <- pi_x_un[pi_x_un$scenario=="earthquake",]
 
-
+## get means, sds, and upper/lower intervals
 pi_x= spread(pi_x_un_earth[,c("sex", "age", "pi_x_mean")], key=age, value=pi_x_mean)
 pi_sds= spread(pi_x_un_earth[,c("sex", "age", "pi_x_sd")], key=age, value=pi_x_sd)
 pi_ul = spread(pi_x_un_earth[,c("sex", "age", "pi_x_ul")], key=age, value=pi_x_ul)
 pi_ll = spread(pi_x_un_earth[,c("sex", "age", "pi_x_ll")], key=age, value=pi_x_ll)
+
 ## parameters for the age distribution priors 
 ## Delta method for E(log(theta))
 pi_mu = log(pi_x[,-1])
@@ -64,13 +63,10 @@ D_x_pcbs= spread(pcbs_mx_mean[,c("sex", "age","mean_Dx_noc")], key=age, value=me
 ### 2023 only: combatants
 Dx_cmb <- readRDS("data/Dx_cmb.rds")
 Dx_cmb_spread <- spread(Dx_cmb, key=age, value=Dx_cmb_mean)
-# D_x_int = round(D_x_pcbs[,-1])
 
 ## age-sex specific mortality rates (for 2023 ONLY - add combatants)
 #mu_x_pcbs <-  (D_x_pcbs[,-1] + Dx_cmb_spread[,-1])/E_x[,-1] 
 # mu_x_pcbs <-  (D_x_pcbs[,-1] )/E_x[,-1] 
-#mu_age_pcbs <- colSums(D_x_pcbs[,-1] + Dx_cmb_spread[,-1])/E_age
-# mu_age_pcbs <- colSums(D_x_pcbs[,-1])/E_age
 
 ##2024: 
 mu_x_pcbs <-  (D_x_pcbs[,-1])/E_x[,-1] 
