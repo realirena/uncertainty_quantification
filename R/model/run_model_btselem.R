@@ -125,10 +125,3 @@ model_out <- sampling(compiled_model,
                         rep_int = rep_int[,-1],
                         rep_cat_ind = rep_cat_ind)
 )
-
-## check for convergence
-# 
-# rstan::traceplot(model_out, pars=c("mu_age_total[1]", "pi_x[1,1]", "pi_x[1,3]", "pr"))
-rstan::traceplot(model_out, pars=c("pr", "pi_x[1,1]", "pi_x[2,1]"))
-pairs(model_out, pars=c("pi_x[2,1]", "pi_x[1,1]","mu_x_total[1,1]", "mu_age_total[1]", "lp__"))
-other_pars <- data.frame(summary(model_out, pars=c("pi_x"))$summary)
