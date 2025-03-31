@@ -35,27 +35,27 @@ panels <- tibble(sex = rep(c("Females", "Males", "Total"), 2),
 
 
 ### add new graphing code to plot the uncertainty estimates: 
-results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2019/2023/")
+results_dir <- paste0(getwd(),"/R/model/diff_reporting/samples/")
 vars <- c("ex", "bmmr_lss","year", "sex", "scenario")
 
 ## Palestine results 
-nat_le_m_age0 <- read.csv(paste0(results_dir, "palestine_bu/moh_lifetable_m_le0.csv"))
-nat_le_f_age0 <- read.csv(paste0(results_dir, "palestine_bu/moh_lifetable_f_le0.csv"))
-nat_le_t_age0 <- read.csv(paste0(results_dir, "palestine_bu/moh_lifetable_t_le0.csv"))
+nat_le_m_age0 <- read.csv(paste0(results_dir, "palestine/moh23_lifetable_m_le0.csv"))
+nat_le_f_age0 <- read.csv(paste0(results_dir, "palestine/moh23_lifetable_f_le0.csv"))
+nat_le_t_age0 <- read.csv(paste0(results_dir, "palestine/moh23_lifetable_t_le0.csv"))
 
 nat_all <- rbind(nat_le_f_age0[,vars], nat_le_m_age0[,vars], nat_le_t_age0[,vars])
 nat_all$region="Palestine"
 
 ## Gaza results
-gaza_le_m_age0 <- read.csv(paste0(results_dir, "gaza_bu/moh_lifetable_m_le0.csv"))
-gaza_le_f_age0 <- read.csv(paste0(results_dir, "gaza_bu/moh_lifetable_f_le0.csv"))
-gaza_le_t_age0 <- read.csv(paste0(results_dir, "gaza_bu/moh_lifetable_t_le0.csv"))
+gaza_le_m_age0 <- read.csv(paste0(results_dir, "gaza/moh23_lifetable_m_le0.csv"))
+gaza_le_f_age0 <- read.csv(paste0(results_dir, "gaza/moh23_lifetable_f_le0.csv"))
+gaza_le_t_age0 <- read.csv(paste0(results_dir, "gaza/moh23_lifetable_t_le0.csv"))
 
 gaza_all <- rbind(gaza_le_f_age0[,vars], gaza_le_m_age0[,vars], gaza_le_t_age0[,vars])
 gaza_all$region="Gaza Strip"
 
 ## West Bank results
-wb_all <- read_rds(paste0(results_dir, "west_bank/lifetable_age0_wb_23_v2.rds")) 
+wb_all <- read_rds("R/model/samples/pcbs_2019/2023/west_bank/lifetable_age0_wb_23_v2.rds")
 wb_all$region="West Bank"
 
 le_lss_all <- rbind(nat_all, gaza_all, wb_all) 
@@ -154,27 +154,27 @@ le0_lss <- gridExtra::grid.arrange(le0_plot, lss_plot)
 #### ---------------
 
 ### add new graphing code to plot the 2024 uncertainty estimates: 
-results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2019/2024/")
+# results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2019/2024/")
 
 ## palestine 
 
-nat_le_m_24 <- read.csv(paste0(results_dir, "palestine_bu/moh_lifetable_m_le0.csv"))
-nat_le_f_24 <- read.csv(paste0(results_dir, "palestine_bu/moh_lifetable_f_le0.csv"))
-nat_le_t_24 <- read.csv(paste0(results_dir, "palestine_bu/moh_lifetable_t_le0.csv"))
+nat_le_m_24 <- read.csv(paste0(results_dir, "palestine/moh24_lifetable_m_le0.csv"))
+nat_le_f_24 <- read.csv(paste0(results_dir, "palestine/moh24_lifetable_f_le0.csv"))
+nat_le_t_24 <- read.csv(paste0(results_dir, "palestine/moh24_lifetable_t_le0.csv"))
 
 nat_24_all  <- rbind(nat_le_m_24[,vars], nat_le_f_24[,vars],nat_le_t_24[,vars])
 nat_24_all$region="Palestine"
 
 ## gaza 
-gaza_le_m_24 <- read.csv(paste0(results_dir, "gaza_bu/moh_lifetable_m_le0.csv"))
-gaza_le_f_24 <- read.csv(paste0(results_dir, "gaza_bu/moh_lifetable_f_le0.csv"))
-gaza_le_t_24 <- read.csv(paste0(results_dir, "gaza_bu/moh_lifetable_t_le0.csv"))
+gaza_le_m_24 <- read.csv(paste0(results_dir, "gaza/moh24_lifetable_m_le0.csv"))
+gaza_le_f_24 <- read.csv(paste0(results_dir, "gaza/moh24_lifetable_f_le0.csv"))
+gaza_le_t_24 <- read.csv(paste0(results_dir, "gaza/moh24_lifetable_t_le0.csv"))
 
 gaza_24_all <- rbind(gaza_le_f_24[,vars], gaza_le_m_24[,vars], gaza_le_t_24[,vars])
 gaza_24_all$region="Gaza Strip"
 
 ## replace with names of the WB lifetables 
-wb_24_all <- read_rds(paste0(results_dir, "west_bank/lifetable_age0_wb_24_v2.rds")) 
+wb_24_all <- read_rds("R/model/samples/pcbs_2019/2024/west_bank/lifetable_age0_wb_24_v2.rds")
 wb_all$region="West Bank"
 
 le_lss_all24 <- rbind(nat_24_all, gaza_24_all, wb_24_all)
@@ -263,6 +263,7 @@ focus_female <- ggplot() +
   guides(shape = "none", linetype = "none") +
   theme_bw()+
   scale_x_continuous(breaks = c(2023,2024)) +
+  scale_y_continuous(breaks = seq(35,70,5)) + 
   # guides(color = guide_legend(override.aes = list(linetype = 0)),
   #        linetype = guide_legend(order = 1))+ 
   theme(strip.background = element_blank(),
@@ -300,7 +301,7 @@ embedded_grob <- ggplotGrob(focus_male)
 embedded_grob_f <- ggplotGrob(focus_female)
 
 rect_data_m <- data.frame(xmin = c(2022), xmax = c(2025), ymin = c(32), ymax = c(60), sex = "Males")
-rect_data_f <- data.frame(xmin = c(2022), xmax = c(2025), ymin = c(42), ymax = c(67), sex = "Females")
+rect_data_f <- data.frame(xmin = c(2022), xmax = c(2025), ymin = c(39), ymax = c(67), sex = "Females")
 
 # Combine the plots
 le0_23_24_2 <- le0_23_24 +
@@ -317,7 +318,7 @@ le0_23_24_2 <- le0_23_24 +
             fill = NA, color = "black", linewidth = 0.5, linetype = 2)  +
   geom_segment(data = rect_data_m, aes(x = 2022, xend = 2019.755, y = 32, yend = 10), size = 0.5) +
   geom_segment(data = rect_data_m, aes(x = 2022, xend = 2019.755, y = 60, yend = 60), size = 0.5) +
-  geom_segment(data = rect_data_f, aes(x = 2022, xend = 2019.75, y = 42, yend = 10), size = 0.5) +
+  geom_segment(data = rect_data_f, aes(x = 2022, xend = 2019.75, y = 39, yend = 10), size = 0.5) +
   geom_segment(data = rect_data_f, aes(x = 2022, xend = 2019.75, y = 67, yend = 60), size = 0.5) +
   # guides(fill = guide_legend(override.aes = list(linetype = 0, pch = NA)),
   #        linetype = guide_legend(order = 1),  shape = "none")
@@ -329,4 +330,4 @@ le0_23_24_2
 
 # le0_lss_23_24 <- gridExtra::grid.arrange(le0_23_24_2, lss_23_24)
 # 
-ggsave(le0_23_24_2, file = "figures/LE_regions_zoom.pdf", height = 7.32, width = 9.12)
+ggsave(le0_23_24_2, file = "figures/LE_regions_zoom_agesex_pr.pdf", height = 7.32, width = 9.12)
