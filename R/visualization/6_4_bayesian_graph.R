@@ -47,12 +47,12 @@ results_dir <- paste0(getwd(),"/R/sensitivity_check/samples_23_24/")
 results_dir <- paste0(getwd(),"/R/model/diff_reporting/samples/gaza/")
 vars <- c("ex", "bmmr_lss","year", "sex", "scenario")
 
-## oct 26th results (updated with age distribution uncertainty)
-oct26_le_m_age0 <- read.csv(paste0(results_dir, "moh23_lifetable_m_le0.csv"))
-oct26_le_f_age0 <- read.csv(paste0(results_dir, "moh23_lifetable_f_le0.csv"))
-oct26_le_t_age0 <- read.csv(paste0(results_dir, "moh23_lifetable_t_le0.csv"))
+## moh results
+moh23_le_m_age0 <- read.csv(paste0(results_dir, "moh23_lifetable_m_le0.csv"))
+moh23_le_f_age0 <- read.csv(paste0(results_dir, "moh23_lifetable_f_le0.csv"))
+moh23_le_t_age0 <- read.csv(paste0(results_dir, "moh23_lifetable_t_le0.csv"))
 
-oct_26_all <- rbind(oct26_le_f_age0[,vars], oct26_le_m_age0[,vars], oct26_le_t_age0[,vars])
+moh23_all <- rbind(moh23_le_f_age0[,vars], moh23_le_m_age0[,vars], moh23_le_t_age0[,vars])
 
 ## B'tselem results
 bts_le_m_age0 <- read.csv(paste0(results_dir, "bts23_lifetable_m_le0.csv"))
@@ -71,7 +71,7 @@ un_le_t_geno23 <- read.csv(paste0(results_dir, "un_geno23_lifetable_t_le0.csv"))
 
 un_genocide23_all <- rbind(un_le_f_geno23[,vars], un_le_m_geno23[,vars], un_le_t_geno23[,vars])
 
-le_lss_geno_all <- rbind(oct_26_all, bts_all, un_genocide23_all)
+le_lss_geno_all <- rbind(moh23_all, bts_all, un_genocide23_all)
 
 le_lss_geno_all |>
   group_by(sex, year, scenario) |>
@@ -199,7 +199,7 @@ un_le_t_age0 <- read.csv(paste0(results_dir, "un_conflict23_lifetable_t_le0.csv"
 
 un_conf23_all <- rbind(un_le_f_age0[,vars], un_le_m_age0[,vars], un_le_t_age0[,vars])
 
-le_lss_conf_all <- rbind(oct_26_all, bts_all, un_conf23_all)
+le_lss_conf_all <- rbind(moh23_all, bts_all, un_conf23_all)
 
 le_lss_conf_all |>
   group_by(sex, year) |>
@@ -315,7 +315,7 @@ un_le_t_earth23 <- read.csv(paste0(results_dir, "un_earth23_lifetable_t_le0.csv"
 
 un_earth23_all <- rbind(un_le_f_earth23[,vars], un_le_m_earth23[,vars], un_le_t_earth23[,vars])
 
-le_lss_earth_all <- rbind(oct_26_all, bts_all, un_earth23_all)
+le_lss_earth_all <- rbind(moh23_all, bts_all, un_earth23_all)
 
 
 ## plot of life expectancies at birth 
@@ -423,7 +423,7 @@ un_le_t_earth23 <- read.csv(paste0(results_dir, "un_earth23_lifetable_t_le0.csv"
 
 un_earth23_all <- rbind(un_le_f_earth23[,vars], un_le_m_earth23[,vars], un_le_t_earth23[,vars])
 
-le_lss_un_all <- rbind(oct_26_all, bts_all, un_earth23_all %>%
+le_lss_un_all <- rbind(moh23_all, bts_all, un_earth23_all %>%
                          mutate(scenario = "UN-IGME earthquake pattern"), 
                        un_conf23_all%>%
                          mutate(scenario = "UN-IGME conflict pattern"), 

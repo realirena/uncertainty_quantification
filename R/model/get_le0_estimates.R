@@ -34,7 +34,7 @@ le_pst_23_24 <- c(79.73368,  76.38461, 78.04232)
 
 ## read in samples 
 
-file_names <- c("moh24_samples_1","moh24_samples_2", "moh24_samples_3", "moh24_samples_4")
+file_names <- c("bts_24_samples_1","bts_24_samples_2", "bts_24_samples_3", "bts_24_samples_4")
 model_out <- read_stan_csv(paste0(results_dir, file_names,".csv"))
 
 ### extract the model-generated mortality distributions (incl WPP deaths)
@@ -72,9 +72,9 @@ all_lifetable_m <- Reduce(rbind,lifetable_m)
 all_lifetable_t <- Reduce(rbind,lifetable_t)
 
 ## "B'Tselem historical average" "UN-IGME report" , 
-lifetable_f_age0 <- get_le0_dt(all_lifetable_f, "Females", 2024,  "GMoH report",le0= le_gaza_23_24)
-lifetable_m_age0 <- get_le0_dt(all_lifetable_m, "Males", 2024,  "GMoH report" ,le0= le_gaza_23_24)
-lifetable_t_age0 <- get_le0_dt(all_lifetable_t, "Total", 2024, "GMoH report", le_gaza_23_24)
+lifetable_f_age0 <- get_le0_dt(all_lifetable_f, "Females", 2024,"B'Tselem historical average",le0=le_gaza_23_24)
+lifetable_m_age0 <- get_le0_dt(all_lifetable_m, "Males", 2024, "B'Tselem historical average" ,le0= le_gaza_23_24)
+lifetable_t_age0 <- get_le0_dt(all_lifetable_t, "Total", 2024, "B'Tselem historical average", le0=le_gaza_23_24)
 
 ## histograms of the estimated life expectancies after accounting for reporting rate error 
 hist(lifetable_f_age0$ex)
@@ -82,9 +82,9 @@ hist(lifetable_m_age0$ex)
 hist(lifetable_t_age0$ex)
 
 
-write.csv(lifetable_m_age0, paste0(results_dir, "moh_23_24_lifetable_m_le0.csv"), row.names = FALSE)
-write.csv(lifetable_f_age0, paste0(results_dir, "moh_23_24_lifetable_f_le0.csv"), row.names = FALSE)
-write.csv(lifetable_t_age0, paste0(results_dir, "moh_23_24_lifetable_t_le0.csv"), row.names = FALSE)
+write.csv(lifetable_m_age0, paste0(results_dir, "bts_23_24_lifetable_m_le0.csv"), row.names = FALSE)
+write.csv(lifetable_f_age0, paste0(results_dir, "bts_23_24_lifetable_f_le0.csv"), row.names = FALSE)
+write.csv(lifetable_t_age0, paste0(results_dir, "bts_23_24_lifetable_t_le0.csv"), row.names = FALSE)
 
 all_lt <- rbind(lifetable_f_age0, lifetable_m_age0, lifetable_t_age0)
 
@@ -129,18 +129,3 @@ g3 <- ggplot(data=lifetable_t_age0, aes(x=ex)) +
 
 
 gridExtra::grid.arrange(g1, g2, g3, ncol=3)
-
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-write.csv(lifetable_m_age0, paste0(results_dir, "un_geno24_lifetable_m_le0.csv"), row.names = FALSE)
-write.csv(lifetable_f_age0, paste0(results_dir, "un_geno24_lifetable_f_le0.csv"), row.names = FALSE)
-write.csv(lifetable_t_age0, paste0(results_dir, "un_geno24_lifetable_t_le0.csv"), row.names = FALSE)
-
-=======
-write.csv(lifetable_m_age0, paste0(results_dir, "bts_lifetable_m_le0.csv"), row.names = FALSE)
-write.csv(lifetable_f_age0, paste0(results_dir, "bts_lifetable_f_le0.csv"), row.names = FALSE)
-write.csv(lifetable_t_age0, paste0(results_dir, "bts_lifetable_t_le0.csv"), row.names = FALSE)
->>>>>>> Stashed changes
-
-=======
->>>>>>> Stashed changes
