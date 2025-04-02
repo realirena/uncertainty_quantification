@@ -10,14 +10,16 @@ source("R/0_setup.R")
 
 ## set the working directory
 setwd("U:/Documents/repos/uncertainty_quantification")
-# results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2019/2024/palestine_bu/")
 results_dir <- paste0(getwd(),"/R/model/diff_reporting/samples/gaza/")
 
-
+## get the age groups for the lifetable calculations 
 pi_x <- readRDS("data/pi_x_moh_2024_gaza.rds")
 pi_x <- pi_x[pi_x$sex!="t",]
 pi_spread <- spread(pi_x[,c("sex", "age", "pi_x_mean")], key=age, value=pi_x_mean)
+
 x <- as.numeric(colnames(pi_spread)[2:19])
+
+
 # ### estimated LE's (noc) by region and sex
 le_noc_list <- list(
   c(78.2272,74.95395, 76.67211), ## gaza 2023
@@ -26,14 +28,11 @@ le_noc_list <- list(
   c(79.78170, 76.44891, 78.09980) ## palestine 2024
 )
 
+## for cumulative 2023-2024 numbers 
 le_gaza_23_24 <- c(78.25961,  75.00566, 76.72000)
 le_pst_23_24 <- c(79.73368,  76.38461, 78.04232)
 
-# le_pst_23_24 <- c(ex0_w_23_24 %>% filter(source == "lc_pcbs_2019" & year == 2023.5 & region == "Palestine") %>% arrange(sex) %>% .$ex_noc)
-
-
 ## read in samples 
-
 file_names <- c("bts_24_samples_1","bts_24_samples_2", "bts_24_samples_3", "bts_24_samples_4")
 model_out <- read_stan_csv(paste0(results_dir, file_names,".csv"))
 
@@ -43,22 +42,24 @@ mu_x_total = rstan::extract(model_out, pars=c("mu_x_total"))$mu_x_total
 ## mortality over sexes (only age specific )
 mu_age_total =  rstan::extract(model_out, pars=c("mu_age_total"))$mu_age_total
 
-## this is a 8000 (iterations) x 2 (sex) x 17 (age groups) array 
-## we can get 8000 le0 estimates using the following code: 
-lifetable_m  <- list()
-lifetable_f  <- list()
-lifetable_t <- list()
-
 num_iter <- dim(mu_x_total)[1] ## grab the number of MCMC iterations 
 ## alternative: if we don't want to use all of the samples, we can just use a random sample of iterations 
 set.seed(243)
+
+## extract 1,000 random draws of the model
 ran_iter <- sample(c(1:num_iter), 1000, replace=FALSE)
 
-## this should now be an array with dimension ran_iter x 2 x 17 
+## this should now be an array with dimension 1000 x 2 (sex) x 18 (age groups)
 mu_x_subset <- mu_x_total[ran_iter,,]
 mu_age_subset <- mu_age_total[ran_iter,]
 ## get estimated life expectancies from the life table calculations 
 
+##  list to hold each lifetable calculation (by iteration)
+lifetable_m  <- list()
+lifetable_f  <- list()
+lifetable_t <- list()
+
+## we can get 1000 le0 estimates using the following code: 
 for(i in 1:1000){
   lifetable_f[[i]] <- lifetable.mx(x, t(mu_x_subset[i, 1,]), sex="f")  # get life expectancy for women 
   lifetable_m[[i]] <- lifetable.mx(x, t(mu_x_subset[i,2,]))# get life expectancy for men 
@@ -71,9 +72,9 @@ all_lifetable_f <- Reduce(rbind,lifetable_f)
 all_lifetable_m <- Reduce(rbind,lifetable_m)
 all_lifetable_t <- Reduce(rbind,lifetable_t)
 
-## "B'Tselem historical average" "UN-IGME report" , 
+## "B'Tselem historical average" "UN-IGME report" , "GMoH report"
 lifetable_f_age0 <- get_le0_dt(all_lifetable_f, "Females", 2024, "UN-IGME report" ,le0=le_gaza_23_24)
-lifetable_m_age0 <- get_le0_dt(all_lifetable_m, "Males", 2024, "UN-IGME report" , ,le0= le_gaza_23_24)
+lifetable_m_age0 <- get_le0_dt(all_lifetable_m, "Males", 2024, "UN-IGME report" , le0= le_gaza_23_24)
 lifetable_t_age0 <- get_le0_dt(all_lifetable_t, "Total", 2024,  "UN-IGME report" , le0=le_gaza_23_24)
 
 ## histograms of the estimated life expectancies after accounting for reporting rate error 
