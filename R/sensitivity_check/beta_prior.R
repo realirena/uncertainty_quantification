@@ -171,10 +171,41 @@ rep_cat = 5
 file_names <- c("moh24_samples_1","moh24_samples_2", "moh24_samples_3", "moh24_samples_4")
 model_out <- read_stan_csv(paste0(results_dir, file_names,".csv"))
 
-data.frame(summary(model_out, pars=c("pr"))$summary)
+pr_summary <- data.frame(summary(model_out, pars=c("pr"))$summary)
+pr_summary$sex <- rep(c("Female", "Male"), each=5)
+pr_summary$agegrp <- rep(c(0,15, 30, 45, 60), 2)
+
+pr_summary <- merge(pr_summary[,c("sex", "agegrp", "mean", "X2.5.", "X97.5.")], rep_rate_grp, by=c("sex", "agegrp"))
 ### extract the model-generated mortality distributions (incl WPP deaths)
 pr_samples = data.frame(extract(model_out, pars=c("pr"))$pr)
+df2 <- data.frame(t(pr_samples)) 
+df2$sex <- rep_rate_grp$sex
+df2$agegrp <- rep_rate_grp$agegrp
+df2$pr_mean <- rep_rate_grp$pr_mean
 
+pr_plot <- melt(df2, id.vars=c("sex", "agegrp", "pr_mean"), variable.name="iteration", value.name="est")
+
+
+pr_plot <- plot(model_out, pars=c("pr"), show_density = TRUE, ci_level = 0.8, fill_color = "purple") 
+
+ggplot(data=pr_plot) + 
+  geom_histogram(aes(x=est, group=sex, color=sex, fill=sex), alpha=0.75) +
+  facet_wrap(~agegrp) + 
+  geom_bar(aes(x=pr_mean, color=sex, fill=sex)) + 
+  labs(title = "") +  
+  theme(plot.title=element_text(size=20, hjust=0.5),
+        plot.subtitle = element_text(size=18, hjust=0.5),
+        axis.text.x = element_text(size=12,angle =45, vjust = 1, hjust = 1),
+        axis.title=element_text(size=12),
+        axis.text.y = element_text(size=12))
+
+
+
+
+
+
+
+pr_plot
 
 set.seed(1234)
 pr_prior =rbeta(10000,2, 2)*0.3536502+0.2255704
