@@ -11,7 +11,7 @@ setwd("U:/Documents/repos/uncertainty_quantification/")
 source("R/0_setup.R")
 ## set the working directory
 model_dir <- paste0(getwd(),"/R/model/diff_reporting/")
-results_dir <- paste0(getwd(),"/R/model/diff_reporting/samples/palestine/")
+results_dir <- paste0(getwd(),"/R/model/diff_reporting/samples/gaza/pcbs_2022/")
 # results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2019/2023/palestine_bu/")
 ## load the 2024 moh age distributions (as an example)
 pi_x_moh <- readRDS("data/pi_x_moh_2024.rds")
@@ -32,7 +32,7 @@ pi_sd = pi_sds[,-1]/pi_x[,-1]
 ##-------------------------------
 ## read in exposure data:
 master_forecast_dt <- readRDS("R/lc/data_plus_forecasts_v2.rds")
-pcbs_exp  <- master_forecast_dt[master_forecast_dt$region=="Palestine"&master_forecast_dt$year==2024&master_forecast_dt$sex%in%c("m", "f")&master_forecast_dt$source=="pcbs",]
+pcbs_exp  <- master_forecast_dt[master_forecast_dt$region=="Gaza Strip"&master_forecast_dt$year==2024&master_forecast_dt$sex%in%c("m", "f")&master_forecast_dt$source=="pcbs",]
 ## number of exposures by age
 E_x = spread(pcbs_exp[,c("sex", "age","pop")], key=age, value=pop)
 ## exposures by age 
@@ -42,7 +42,7 @@ E = sum(rowSums(E_x[,-1]))
 
 
 ## reshape the forecasted baseline mortality as well 
-pcbs_mx<-  master_forecast_dt[master_forecast_dt$region=="Palestine"&master_forecast_dt$year==2024&master_forecast_dt$sex%in%c("m", "f")&master_forecast_dt$source=="lc_pcbs_2019",]
+pcbs_mx<-  master_forecast_dt[master_forecast_dt$region=="Gaza Strip"&master_forecast_dt$year==2024&master_forecast_dt$sex%in%c("m", "f")&master_forecast_dt$source=="lc_pcbs_2022",]
 
 pcbs_mx_mean <- pcbs_mx |> 
   select(year, sex, age, mx_noc) |>
@@ -54,13 +54,13 @@ pcbs_mx_mean <- pcbs_mx |>
 D_x_pcbs= spread(pcbs_mx_mean[,c("sex", "age","mean_Dx_noc")], key=age, value=mean_Dx_noc)
 
 ### 2023 only: combatants
-Dx_cmb <- readRDS("data/Dx_cmb.rds")
-Dx_cmb_spread <- spread(Dx_cmb, key=age, value=Dx_cmb_mean)
+# Dx_cmb <- readRDS("data/Dx_cmb.rds")
+# Dx_cmb_spread <- spread(Dx_cmb, key=age, value=Dx_cmb_mean)
 #D_x_int = round(D_x_pcbs[,-1])
 
 ## age-sex specific mortality rates (for 2023 ONLY - add combatants)
-#mu_x_pcbs <-  (D_x_pcbs[,-1] + Dx_cmb_spread[,-1])/E_x[,-1] 
-#mu_age_pcbs <- colSums(D_x_pcbs[,-1] + Dx_cmb_spread[,-1])/E_age
+# mu_x_pcbs <-  (D_x_pcbs[,-1] + Dx_cmb_spread[,-1])/E_x[,-1] 
+# mu_age_pcbs <- colSums(D_x_pcbs[,-1] + Dx_cmb_spread[,-1])/E_age
 # ## for 2024
 mu_x_pcbs <-  (D_x_pcbs[,-1])/E_x[,-1] 
 mu_age_pcbs <- colSums(D_x_pcbs[,-1])/E_age
@@ -68,7 +68,7 @@ mu_age_pcbs <- colSums(D_x_pcbs[,-1])/E_age
 ### set the reported death toll (Palestine 2023: 22130, 2024: 24217)
 ### WB: 2023: 308, 2024: 494 
 ## Gaza Strip: 2023: 21822,  2024: 23719
-R =24217
+R = 23719
 ## total number of sexes 
 S = nrow(mu_x_pcbs)
 ## total number of age groups 

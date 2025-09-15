@@ -5,13 +5,12 @@ library(reshape2)
 library(stringr)
 library(rstan)
 seed = 1234
-## load the functions to calculate life expectancy 
-source("R/0_setup.R")
 
 ## set the working directory
 setwd("U:/Documents/repos/uncertainty_quantification")
-results_dir <- paste0(getwd(),"/R/model/diff_reporting/samples/gaza/")
-
+results_dir <- paste0(getwd(),"/R/model/diff_reporting/samples/gaza/pcbs_2022/")
+## load the functions to calculate life expectancy 
+source("R/0_setup.R")
 ## get the age groups for the lifetable calculations 
 pi_x <- readRDS("data/pi_x_moh_2024_gaza.rds")
 pi_x <- pi_x[pi_x$sex!="t",]
@@ -19,13 +18,13 @@ pi_spread <- spread(pi_x[,c("sex", "age", "pi_x_mean")], key=age, value=pi_x_mea
 
 x <- as.numeric(colnames(pi_spread)[2:19])
 
-
+le_noc <- readRDS("data/ex0_noc_pcbs_2022.rds")
 # ### estimated LE's (noc) by region and sex
 le_noc_list <- list(
-  c(78.2272,74.95395, 76.67211), ## gaza 2023
-  c(78.29336,	75.06242 ,76.77138), ## gaza 2024 ,
-  c(79.68532, 76.32110, 77.98499), ## palestine 2023,
-  c(79.78170, 76.44891, 78.09980) ## palestine 2024
+  c(76.56860,73.23984, 74.77036), ## gaza 2023
+  c(76.51045,	73.16800 ,74.68761), ## gaza 2024 ,
+  c(77.92489, 74.58173, 76.37233), ## palestine 2023,
+  c(77.84302, 74.54344, 76.32383) ## palestine 2024
 )
 
 ## for cumulative 2023-2024 numbers 
@@ -33,7 +32,7 @@ le_gaza_23_24 <- c(78.25961,  75.00566, 76.72000)
 le_pst_23_24 <- c(79.73368,  76.38461, 78.04232)
 
 ## read in samples 
-file_names <- c("bts_24_samples_1","bts_24_samples_2", "bts_24_samples_3", "bts_24_samples_4")
+file_names <- c("un_conflict_23_samples_1","un_conflict_23_samples_2", "un_conflict_23_samples_3", "un_conflict_23_samples_4")
 model_out <- read_stan_csv(paste0(results_dir, file_names,".csv"))
 
 ### extract the model-generated mortality distributions (incl WPP deaths)
@@ -73,9 +72,9 @@ all_lifetable_m <- Reduce(rbind,lifetable_m)
 all_lifetable_t <- Reduce(rbind,lifetable_t)
 
 ## "B'Tselem historical average" "UN-IGME report" , "GMoH report"
-lifetable_f_age0 <- get_le0_dt(all_lifetable_f, "Females", 2024, "B'Tselem historical average",le0=le_gaza_23_24)
-lifetable_m_age0 <- get_le0_dt(all_lifetable_m, "Males", 2024, "B'Tselem historical average", le0= le_gaza_23_24)
-lifetable_t_age0 <- get_le0_dt(all_lifetable_t, "Total", 2024,  "B'Tselem historical average", le0=le_gaza_23_24)
+lifetable_f_age0 <- get_le0_dt(all_lifetable_f, "Females", 2023,"UN-IGME report",le0=le_noc_list[[1]])
+lifetable_m_age0 <- get_le0_dt(all_lifetable_m, "Males", 2023,"UN-IGME report", le0= le_noc_list[[1]])
+lifetable_t_age0 <- get_le0_dt(all_lifetable_t, "Total", 2023,"UN-IGME report" , le0=le_noc_list[[1]])
 
 ## histograms of the estimated life expectancies after accounting for reporting rate error 
 hist(lifetable_f_age0$ex)
@@ -83,9 +82,9 @@ hist(lifetable_m_age0$ex)
 hist(lifetable_t_age0$ex)
 
 
-write.csv(lifetable_m_age0, paste0(results_dir, "bts_24_lifetable_m_le0.csv"), row.names = FALSE)
-write.csv(lifetable_f_age0, paste0(results_dir, "bts_24_lifetable_f_le0.csv"), row.names = FALSE)
-write.csv(lifetable_t_age0, paste0(results_dir, "bts_lifetable_t_le0.csv"), row.names = FALSE)
+write.csv(lifetable_m_age0, paste0(results_dir, "un_conflict23_lifetable_m_le0.csv"), row.names = FALSE)
+write.csv(lifetable_f_age0, paste0(results_dir, "un_conflict23_lifetable_f_le0.csv"), row.names = FALSE)
+write.csv(lifetable_t_age0, paste0(results_dir, "un_conflict23_lifetable_t_le0.csv"), row.names = FALSE)
 
 all_lt <- rbind(lifetable_f_age0, lifetable_m_age0, lifetable_t_age0)
 
