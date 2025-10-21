@@ -101,7 +101,7 @@ le0_plot <- ggplot() +
                                          fill=scenario, 
                                          color=scenario),
                     size=2,
-                    alpha=0.5) +
+                    alpha=0.4, side = "both", lwd = 4) +
   geom_point(data = le_lss_all %>% filter(year >= 2023) %>%
                group_by(year, sex, scenario) %>%
                mutate(ex_mean = mean(ex)),
@@ -115,6 +115,7 @@ le0_plot <- ggplot() +
   scale_x_continuous(breaks = c(2023,2024)) +
   facet_grid(~sex, scale = "free_y", space = "free_y", switch = "y") +
   scale_linetype_discrete(name="")+
+  scale_shape_manual(values = c(16,15,17)) +
   theme_bw()+
   guides(fill = guide_legend(override.aes = list(linetype = 0, pch = NA, color = "black")),
          linetype = guide_legend(order = 1),  shape = "none")+ 
@@ -132,7 +133,7 @@ le0_plot <- ggplot() +
 ## Add 2024
 le0_23_24  <- le0_plot +  stat_histinterval(data=le_lss_all24, aes(x = year, y=ex, group=scenario, 
                                                                    fill=scenario, color=scenario),
-                                            size=2, alpha=0.5) +
+                                            size=2, alpha=0.4, side = "both", lwd = 4) +
   geom_point(data = le_lss_all24 %>% filter(year >= 2023) %>%
                group_by(year, sex, scenario) %>%
                mutate(ex_mean = mean(ex)),
