@@ -11,10 +11,10 @@ setwd("U:/Documents/repos/uncertainty_quantification/")
 source("R/0_setup.R")
 ## set the working directory
 model_dir <- paste0(getwd(),"/R/model/diff_reporting/")
-results_dir <- paste0(getwd(),"/R/model/diff_reporting/samples/palestine/")
+results_dir <- paste0(getwd(),"/R/model/diff_reporting/samples/gaza/")
 # results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2019/2023/palestine_bu/")
 ## load the 2024 moh age distributions (as an example)
-pi_x_moh <- readRDS("data/pi_x_moh_2024.rds")
+pi_x_moh <- readRDS("data/pi_x_moh_2024_2025_gaza.rds")
 ## get the sex-specific age distributions 
 pi_x_moh <- pi_x_moh[pi_x_moh$sex!="t",]
 
@@ -31,44 +31,53 @@ pi_sd = pi_sds[,-1]/pi_x[,-1]
 ## read in the exposure and the forecasted baseline mortality 
 ##-------------------------------
 ## read in exposure data:
-master_forecast_dt <- readRDS("R/lc/data_plus_forecasts_v2.rds")
-pcbs_exp  <- master_forecast_dt[master_forecast_dt$region=="Palestine"&master_forecast_dt$year==2024&master_forecast_dt$sex%in%c("m", "f")&master_forecast_dt$source=="pcbs",]
+master_forecast_dt <- readRDS("R/lc/data_plus_forecasts_2025_temp.rds")
+
+### for 2025: we need to take the average between the 2024/2025 pops 
+pcbs_exp  <- master_forecast_dt[master_forecast_dt$region=="Gaza Strip"&master_forecast_dt$year%in%c(2024,2025)&master_forecast_dt$sex%in%c("m", "f")&master_forecast_dt$source=="pcbs",]
+
+pcbs_ex_24_25 <- pcbs_exp |> 
+  group_by(sex, age) |>
+  summarise(mean_pop = mean(pop))
+
+
 ## number of exposures by age
-E_x = spread(pcbs_exp[,c("sex", "age","pop")], key=age, value=pop)
+E_x = spread(pcbs_ex_24_25[,c("sex", "age","mean_pop")], key=age, value=mean_pop)
 ## exposures by age 
 E_age =colSums(E_x[,-1])
 ## get total exposures 
 E = sum(rowSums(E_x[,-1]))
 
+## do the same averaging for the baseline mortality: 
+pcbs_mx<-  master_forecast_dt[master_forecast_dt$region=="Gaza Strip"&master_forecast_dt$year%in%c(2024,2025)&master_forecast_dt$sex%in%c("m", "f")&master_forecast_dt$source=="lc_pcbs_2019",]
 
-## reshape the forecasted baseline mortality as well 
-pcbs_mx<-  master_forecast_dt[master_forecast_dt$region=="Palestine"&master_forecast_dt$year==2024&master_forecast_dt$sex%in%c("m", "f")&master_forecast_dt$source=="lc_pcbs_2019",]
-
-pcbs_mx_mean <- pcbs_mx |> 
+pcbs_mx_24_25 <- pcbs_mx |> 
   select(year, sex, age, mx_noc) |>
   left_join(pcbs_exp |> select(year, sex, age, pop), by = c("year", "sex", "age")) |>
   mutate(Dx_noc = mx_noc*pop/1E5) |>
   group_by(sex, age) |>
   summarise(mean_Dx_noc = mean(Dx_noc))
 
-D_x_pcbs= spread(pcbs_mx_mean[,c("sex", "age","mean_Dx_noc")], key=age, value=mean_Dx_noc)
+D_x_pcbs= spread(pcbs_mx_24_25[,c("sex", "age","mean_Dx_noc")], key=age, value=mean_Dx_noc)
+
 
 ### 2023 only: combatants
-Dx_cmb <- readRDS("data/Dx_cmb.rds")
-Dx_cmb_spread <- spread(Dx_cmb, key=age, value=Dx_cmb_mean)
+# Dx_cmb <- readRDS("data/Dx_cmb.rds")
+# Dx_cmb_spread <- spread(Dx_cmb, key=age, value=Dx_cmb_mean)
 #D_x_int = round(D_x_pcbs[,-1])
 
 ## age-sex specific mortality rates (for 2023 ONLY - add combatants)
-#mu_x_pcbs <-  (D_x_pcbs[,-1] + Dx_cmb_spread[,-1])/E_x[,-1] 
-#mu_age_pcbs <- colSums(D_x_pcbs[,-1] + Dx_cmb_spread[,-1])/E_age
+# mu_x_pcbs <-  (D_x_pcbs[,-1] + Dx_cmb_spread[,-1])/E_x[,-1] 
+# mu_age_pcbs <- colSums(D_x_pcbs[,-1] + Dx_cmb_spread[,-1])/E_age
+
 # ## for 2024
 mu_x_pcbs <-  (D_x_pcbs[,-1])/E_x[,-1] 
 mu_age_pcbs <- colSums(D_x_pcbs[,-1])/E_age
 
 ### set the reported death toll (Palestine 2023: 22130, 2024: 24217)
 ### WB: 2023: 308, 2024: 494 
-## Gaza Strip: 2023: 21822,  2024: 23719
-R =24217
+## Gaza Strip: 2023: 21822,  2024: 23719 2025: 25290
+R = 25290
 ## total number of sexes 
 S = nrow(mu_x_pcbs)
 ## total number of age groups 
@@ -95,7 +104,7 @@ compiled_model <- stan_model(paste0(model_dir, "bmmr.stan"))
 
 model_out <- sampling(compiled_model,
                       # include = TRUE,
-                    sample_file=paste0(results_dir, 'moh24_samples.csv'), #writes the samples to CSV file
+                      sample_file=paste0(results_dir, 'moh25_samples.csv'), #writes the samples to CSV file
                       iter =2000,
                       warmup=1000, #BURN IN
                       chains =4,

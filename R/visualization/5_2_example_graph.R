@@ -308,7 +308,7 @@ un_le_t_earth23 <- read.csv(paste0(results_dir, "un_earth23_lifetable_t_le0.csv"
 
 un_earth23_all <- rbind(un_le_f_earth23[,vars], un_le_m_earth23[,vars], un_le_t_earth23[,vars])
 
-le_lss_earth_all <- rbind(moh23_all, bts_all, un_earth23_all)
+le_lss_earth_all <- rbind(moh23_all, bts23_all, un_earth23_all)
 
 ## plot of life expectancies at birth 
 le0_plot_earth <- ggplot() +   
@@ -399,12 +399,12 @@ lss_earth_23_24  <-  lss_plot_earth +
 
 le0_lss_earth_23_24 <- ggarrange(le0_earth_23_24, lss_earth_23_24, nrow = 2, common.legend = TRUE, legend = "bottom")
 
-ggsave(le0_lss_earth_23_24, file = "figures/LE_sources_gaza_earthquake.pdf", width = 16, height = 8)
+#ggsave(le0_lss_earth_23_24, file = "figures/LE_sources_gaza_earthquake.pdf", width = 16, height = 8)
 
 #-----------------------------------------------------
 # ALL UN patterns 
 #-----------------------------------------------------
-le_lss_un_all <- rbind(moh23_all, bts_all, un_earth23_all %>%
+le_lss_un_all <- rbind(moh23_all, bts23_all, un_earth23_all %>%
                          mutate(scenario = "UN-IGME earthquake pattern"), 
                        un_conf23_all%>%
                          mutate(scenario = "UN-IGME conflict pattern"), 
@@ -498,7 +498,7 @@ lss_un_23_24  <-  lss_plot_un +
 
 le0_lss_un_23_24 <- ggarrange(le0_un_23_24, lss_un_23_24, nrow = 2, common.legend = TRUE, legend = "bottom")
 
-ggsave(le0_lss_un_23_24, file = "figures/LE_sources_gaza_all_scenarios.pdf", width = 16, height = 8)
+ggsave(le0_lss_un_23_24, file = "figures/LE_sources_gaza_all_scenarios_pcbs_2022.pdf", width = 16, height = 8)
 
 #-----------------------------------------------------
 ##### For 2023- 2024 (cumulative)
