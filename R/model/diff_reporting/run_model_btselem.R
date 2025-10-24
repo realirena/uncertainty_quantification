@@ -116,3 +116,6 @@ model_out <- sampling(compiled_model,
                         rep_int = rep_int[,-1],
                         rep_cat_ind = rep_cat_ind)
 )
+
+
+rstan::traceplot(model_out, pars=c("pr[1,1]"))
