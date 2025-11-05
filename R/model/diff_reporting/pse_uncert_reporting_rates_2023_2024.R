@@ -102,7 +102,8 @@ gime_rates <- function(rg, yr){
 # population ====
 # ~~~~~~~~~~~~~~~
 # extracting population exposures
-pop <- readRDS("R/lc/data_plus_forecasts_v2.rds")
+# pop <- readRDS("R/lc/data_plus_forecasts_v2.rds")
+pop <- readRDS("R/lc/data_plus_forecasts_2025_temp.rds")
 unique(pop$region)
 unique(pop$year)
 unique(pop$source)
@@ -122,9 +123,17 @@ pop_av <-
           .by = c(region, sex, age)) %>% 
   mutate(year = "23_24")
 
+# exposure for october 24 - september 25 (population of 2024)
+pop25 <- 
+  pop %>% 
+  filter(year == 2024,
+         source == "pcbs") %>% 
+  select(region, year, sex, age, pop) %>%
+  mutate(year = "24_25")
+
 # merging pops
 pop3 <- 
-  bind_rows(pop2, pop_av)
+  bind_rows(pop2, pop_av, pop25)
 
 
 # mortality ====
@@ -152,7 +161,8 @@ for(r in rgs){
 # TODO: pending to include the West Bank
 
 all2 <- 
-  all %>% 
+  all %>%
+  rbind(gime_rates("gaza", "25") %>% mutate(year = "24_25")) %>%
   mutate(region = case_when(region == "gaza" ~ "Gaza Strip",
                             region == "west_bank" ~ "West Bank",
                             region == "palestine" ~ "Palestine",
@@ -183,7 +193,7 @@ Dx_cmb2 <- Dx_cmb %>%
 
 ## Age-sex specific mortality rates for COMBATANTS (2023 and 2023-2024 only)
 mx_cmb <- pop3 %>% 
-  filter(year != 24 & region != "West Bank") %>%
+  filter(!(year %in% c("24", "24_25")) & region != "West Bank") %>%
   left_join(Dx_cmb2, by = c("sex", "age"), relationship = "many-to-many") %>%
   mutate(mx_cmb = Dx_cmb_mean/pop) %>%
   select(-pop)
@@ -250,8 +260,8 @@ psc_age_sex <-
 cols <- c("#ae2012", "#03071e", "#00a6fb")
 mxs_age_sex %>% 
   filter(cause != "conflict") %>% 
-  mutate(year = factor(year, levels = c("23", "24", "23_24"),
-                       labels = c("2023", "2024", "2023-2024")),
+  mutate(year = factor(year, levels = c("23", "24", "23_24", "24_25"),
+                       labels = c("2023", "2024", "2023-2024", "2024_2025")),
          age_ad = ifelse(age == 80, 85, (age + lead(age))/2)) %>% 
   ggplot()+
   geom_ribbon(aes(age_ad, ymin = mx_l, ymax = mx_u, fill = sex, 
@@ -280,8 +290,8 @@ ggsave("Figures/mx.png",
 # plotting sex-age-specific mortality relative risks
 psc_age_sex %>% 
   filter(cause != "conflict") %>% 
-  mutate(year = factor(year, levels = c("23", "24", "23_24"),
-                       labels = c("2023", "2024", "2023-2024")),
+  mutate(year = factor(year, levels = c("23", "24", "23_24", "24_25"),
+                       labels = c("2023", "2024", "2023-2024", "2024-2025")),
          age_ad = ifelse(age == 80, 85, (age + lead(age))/2)) %>% 
   ggplot()+
   geom_ribbon(aes(age_ad, ymin = psc_l, ymax = psc_u, fill = sex, 
@@ -373,8 +383,8 @@ library(scales)
 library(knitr)
 
 tab2 <- tab1 %>%
-  mutate(year = factor(year, levels = c("23", "24", "23_24"),
-                       labels = c("2023", "2024", "2023-2024")),
+  mutate(year = factor(year, levels = c("23", "24", "23_24","24_25"),
+                       labels = c("2023", "2024", "2023-2024", "2024_2025")),
          dts_ci = sprintf("%.2f (%.2f, %.2f)", dts_m, dts_l, dts_u),
          cnf_ci = sprintf("%.2f (%.2f, %.2f)", cnf_m, cnf_l, cnf_u),
          psc_ci = sprintf("%.2f (%.2f, %.2f)", psc_m, psc_l, psc_u)) %>%

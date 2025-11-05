@@ -228,3 +228,14 @@ mx_out %>%
 
 write_rds(mx_out, "R/data_cleaning/data_inter/master_regional_deaths_population_age_sex_2012_2024.rds")
 # write_rds(q0_gz2, "data_inter/un_igme_q01_q05_age_sex_2012_2022.rds")
+
+### TEMPORARY FOR 2024-2025
+
+mx_out <- read_rds("R/data_cleaning/data_inter/master_regional_deaths_population_age_sex_2012_2024.rds")
+
+mx_out2 <- mx_out %>%
+  rbind(mx_out %>%
+          filter(year == 2024 & region == "Gaza Strip" & source == "pcbs") %>%
+          mutate(year = 2025))
+
+write_rds(mx_out2, file = "R/data_cleaning/data_inter/master_regional_deaths_population_age_sex_2012_2025_temp.rds")
