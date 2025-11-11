@@ -14,7 +14,7 @@ model_dir <- paste0(getwd(),"/R/model/diff_reporting/")
 results_dir <- paste0(getwd(),"/R/model/diff_reporting/samples/gaza/")
 # results_dir <- paste0(getwd(),"/R/model/samples/pcbs_2019/2023/palestine_bu/")
 ## load the 2024 moh age distributions (as an example)
-pi_x_moh <- readRDS("data/pi_x_moh_2024_2025_gaza.rds")
+pi_x_moh <- readRDS("data/pi_x_moh_2024_2025_gaza_v2.rds")
 ## get the sex-specific age distributions 
 pi_x_moh <- pi_x_moh[pi_x_moh$sex!="t",]
 
@@ -85,15 +85,19 @@ X = ncol(mu_x_pcbs)
 ## age groups 
 x <- as.numeric(colnames(mu_x_pcbs))
 
-### set different reporting rates for each age group (note that pr_ul and pr_ll are flipped and ul = lower bound):
-rep_rate_grp <- readRDS("data/pr_age.rds")
+### set different reporting rates for each age group 
+rep_rate_grp <- readRDS("data/pr_age_gaza_survey.rds")
+
 rep_rate_grp <- rep_rate_grp[rep_rate_grp$sex%in%c("Female", "Male"),]
-rep_rate_grp$int <- rep_rate_grp$pr_ll - rep_rate_grp$pr_ul
-rep_ll <-  spread(rep_rate_grp[,c("sex", "agegrp", "pr_ul")], key=agegrp, value=pr_ul)
+rep_rate_grp$int <- rep_rate_grp$pr_ul - rep_rate_grp$pr_ll
+rep_ul <-  spread(rep_rate_grp[,c("sex", "agegrp", "pr_ul")], key=agegrp, value=pr_ul)
+rep_ll <-  spread(rep_rate_grp[,c("sex", "agegrp", "pr_ll")], key=agegrp, value=pr_ll)
 rep_int <-  spread(rep_rate_grp[,c("sex", "agegrp", "int")], key=agegrp, value=int)
 
 ### indicator for the reporting rates 
-rep_cat_ind  <- c(rep(1, 4), rep(2,3), rep(3, 3), rep(4, 3), rep(5 ,5))
+#rep_cat_ind  <- c(rep(1, 4), rep(2,3), rep(3, 3), rep(4, 3), rep(5 ,5))
+rep_cat_ind  <- c(rep(1, 5), rep(2,9), rep(3, 4))
+
 rep_cat <- ncol(rep_ll) - 1 
 ##-------------------------------
 ## setting up and running the Bayesian model 
@@ -104,7 +108,7 @@ compiled_model <- stan_model(paste0(model_dir, "bmmr.stan"))
 
 model_out <- sampling(compiled_model,
                       # include = TRUE,
-                      sample_file=paste0(results_dir, 'moh25_samples.csv'), #writes the samples to CSV file
+                      sample_file=paste0(results_dir, 'moh25_gaza_survey_samples.csv'), #writes the samples to CSV file
                       iter =2000,
                       warmup=1000, #BURN IN
                       chains =4,

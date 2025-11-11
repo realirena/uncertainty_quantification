@@ -19,6 +19,9 @@ library(tidyverse)
 library(ggdist)
 library(bayesplot)
 library(reshape2)
+library(ggpubr)
+## set the working directory
+setwd("U:/Documents/repos/uncertainty_quantification/")
 
 # ---------------------------------------------------------------------------- #
 #     1. Load data
