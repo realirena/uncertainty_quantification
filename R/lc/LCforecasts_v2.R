@@ -22,7 +22,8 @@ source("funs/LCfuns.R")
 source("funs/LifetableMX.R")
 
 ## loading data
-data <- readRDS("master_regional_deaths_population_age_sex_2012_2024.rds")
+# data <- readRDS("master_regional_deaths_population_age_sex_2012_2024.rds")
+data <- readRDS("master_regional_deaths_population_age_sex_2012_2025_temp.rds")   # For updated estimates
 
 ## setting up the data 
 
@@ -54,7 +55,7 @@ for (tt in 1:2){
     n <- length(t)
   }
   ## forecast period
-  t.fore <- (t[n]+1):2024
+  t.fore <- (t[n]+1):2025
   n.fore <- length(t.fore)
 
   ## for loop to run over different sexes, regions and data sources
@@ -203,7 +204,7 @@ for (tt in 1:2){
 ## plotting e0 outcomes
 data.with.fore %>% 
   ## remove 2023 from wpp
-  filter(!(source %in% c("wpp2024","pcbs") & year %in% c(2023,2024))) %>% 
+  filter(!(source %in% c("wpp2024","pcbs") & year %in% c(2023,2024,2025))) %>% 
   # filter(source=="lc") %>% 
   group_by(year,sex,region,source) %>% 
   summarise(e0=e0.mx(x=x,mx=mx_noc/1e5)) %>% 
@@ -218,6 +219,7 @@ ggsave("e0fore_v2.pdf",width = 12,height=8)
 
 ## saving data
 saveRDS(data.with.fore, file = "data_plus_forecasts_v2.rds")
+saveRDS(data.with.fore, file = "data_plus_forecasts_2025_temp.rds")
 
 ## END
 
