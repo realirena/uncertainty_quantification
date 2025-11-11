@@ -16,6 +16,7 @@ source("R/0_setup.R")
 model_dir <- paste0(getwd(),"/R/model/diff_reporting/")
 results_dir <- paste0(getwd(),"/R/model/diff_reporting/samples/gaza/pcbs_2022/")
 
+## load the 2024 moh age distributions (as an example)
 ## read in age distributions (btselem data)
 pi_x_selem <- readRDS("data/pi_x_btselem_2024.rds")
 pi_x_selem <- pi_x_selem[pi_x_selem$sex!="t",]
@@ -41,7 +42,7 @@ E_age =colSums(E_x[,-1])
 E = sum(rowSums(E_x[,-1]))
 
 ## reshape the forecasted baseline mortality as well 
-pcbs_mx<-  master_forecast_dt[master_forecast_dt$region=="Gaza Strip"&master_forecast_dt$year==2023&master_forecast_dt$sex%in%c("m", "f")&master_forecast_dt$source=="lc_pcbs_2022",]
+pcbs_mx<-  master_forecast_dt[master_forecast_dt$region=="Gaza Strip"&master_forecast_dt$year==2023&master_forecast_dt$sex%in%c("m", "f")&master_forecast_dt$source=="lc_pcbs_2019",]
 
 pcbs_mx_mean <- pcbs_mx |> 
   select(year, sex, age, mx_noc) |>
@@ -53,11 +54,19 @@ pcbs_mx_mean <- pcbs_mx |>
 D_x_pcbs= spread(pcbs_mx_mean[,c("sex", "age","mean_Dx_noc")], key=age, value=mean_Dx_noc)
 
 ### 2023 only: combatants
-# Dx_cmb <- readRDS("data/Dx_cmb.rds")
-# Dx_cmb_spread <- spread(Dx_cmb, key=age, value=Dx_cmb_mean)
+
 # age-sex specific mortality rates (for 2023 ONLY - add combatants)
 # mu_x_pcbs <-  (D_x_pcbs[,-1] + Dx_cmb_spread[,-1])/E_x[,-1]
 # mu_age_pcbs <- colSums(D_x_pcbs[,-1] + Dx_cmb_spread[,-1])/E_age
+
+Dx_cmb <- readRDS("data/Dx_cmb.rds")
+Dx_cmb_spread <- spread(Dx_cmb, key=age, value=Dx_cmb_mean)
+
+## age-sex specific mortality rates (for 2023 ONLY - add combatants)
+mu_x_pcbs <-  (D_x_pcbs[,-1] + Dx_cmb_spread[,-1])/E_x[,-1] 
+# mu_x_pcbs <-  (D_x_pcbs[,-1])/E_x[,-1]
+mu_age_pcbs <- colSums(D_x_pcbs[,-1] + Dx_cmb_spread[,-1])/E_age
+# mu_age_pcbs <- colSums(D_x_pcbs[,-1] )/E_age
 
 ##2024: 
 mu_x_pcbs <-  (D_x_pcbs[,-1])/E_x[,-1]
@@ -65,7 +74,7 @@ mu_age_pcbs <- colSums(D_x_pcbs[,-1])/E_age
 ### get reported cumulative death count (Palestine 2023: 22130, 2024: 24217)
 ### WB: 2023: 308, 2024: 498 
 ## Gaza Strip: 2023: 21822,  2024: 23719
-R =  23719
+R = 23719
 ### multiply R by the age distribution to get R_x 
 R_x = pi_x[,-1]*R
 
@@ -91,8 +100,11 @@ rep_cat <- ncol(rep_ll) - 1
 # compiled_model <- stan_model(paste0(model_dir, "bmmr_change_prior_trunc.stan"))
 compiled_model <- stan_model(paste0(model_dir, "bmmr_trunc.stan"))
 
+compiled_model <- stan_model(paste0(model_dir, "bmmr_change_prior_trunc.stan"))
+#compiled_model <- stan_model(paste0(model_dir, "bmmr_coverage_intervals_truncated.stan"))
+
 model_out <- sampling(compiled_model,
-                     sample_file=paste0(results_dir, 'bts_24_samples.csv'), #writes the samples to CSV file
+                     sample_file=paste0(results_dir, 'bts_samples.csv'), #writes the samples to CSV file
                       iter =2000,
                       warmup=1000, #BURN IN
                       chains =4,
