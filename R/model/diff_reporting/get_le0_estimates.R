@@ -33,7 +33,7 @@ le_gaza_23_24 <- c(78.25961,  75.00566, 76.72000)
 le_pst_23_24 <- c(79.73368,  76.38461, 78.04232)
 
 ## read in samples 
-file_names <- c("moh25_gaza_survey_samples_1","moh25_gaza_survey_samples_2", "moh25_gaza_survey_samples_3", "moh25_gaza_survey_samples_4")
+file_names <- c("moh25_samples_1","moh25_samples_2", "moh25_samples_3", "moh25_samples_4")
 model_out <- read_stan_csv(paste0(results_dir, file_names,".csv"))
 
 ### extract the model-generated mortality distributions (incl WPP deaths)
@@ -83,9 +83,9 @@ hist(lifetable_m_age0$ex)
 hist(lifetable_t_age0$ex)
 
 
-write.csv(lifetable_m_age0, paste0(results_dir, "moh25_gaza_survey_lifetable_m_le0.csv"), row.names = FALSE)
-write.csv(lifetable_f_age0, paste0(results_dir, "moh25_gaza_survey_lifetable_f_le0.csv"), row.names = FALSE)
-write.csv(lifetable_t_age0, paste0(results_dir, "moh25_gaza_survey_lifetable_t_le0.csv"), row.names = FALSE)
+write.csv(lifetable_m_age0, paste0(results_dir, "moh_25_lifetable_m_le0.csv"), row.names = FALSE)
+write.csv(lifetable_f_age0, paste0(results_dir, "moh_25_lifetable_f_le0.csv"), row.names = FALSE)
+write.csv(lifetable_t_age0, paste0(results_dir, "moh_25_lifetable_t_le0.csv"), row.names = FALSE)
 
 all_lt <- rbind(lifetable_f_age0, lifetable_m_age0, lifetable_t_age0)
 
