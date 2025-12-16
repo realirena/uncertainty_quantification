@@ -329,4 +329,4 @@ pop_war_years %>%
   reframe(pop = sum(pop), .by = c(year, source, sex)) %>%
   filter(sex == "t")
 
-saveRDS(pop_war_years, file = "R/model/diff_reporting/samples/gaza/adjusted_exposures.rds")
+saveRDS(pop_war_years, file = "R/data_cleaning/data_inter/adjusted_exposures.rds")
